@@ -24,7 +24,6 @@ import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members")
 @Slf4j
 public class MemberController {
 

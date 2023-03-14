@@ -27,6 +27,7 @@ public enum Error {
 
     // S3
     FAIL_S3_SAVE("400", "S3파일 저장 중 예외 발생"),
+    FAIL_S3_DELETE("400","S3파일 삭제 중 예외 발생"),
     DELETE_S3_FILE("400","s3에 저장되었던 파일 삭제"),
     WRONG_IMAGE_FORMAT("400", "잘못된 포멧입니다."),
     WRONG_INPUT_CONTEN("400", "파일이 존재하지 않습니다."),

@@ -8,4 +8,7 @@ import java.util.List;
 
 public interface MypageRepository extends JpaRepository<Mypage,Long> {
     List<Mypage> findByMemberId(Long id);
+
+    void deleteByPostId(Long postId);
+
 }

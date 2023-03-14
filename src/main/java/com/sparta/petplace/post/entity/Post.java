@@ -68,4 +68,18 @@ public class Post extends Timestamped {
                 member(member).
                 build();
     }
+
+    public void update(PostRequestDto requestDto , List<PostImage> image) {
+        this.title = requestDto.getTitle();
+        this.category = requestDto.getCategory();
+        this.contents = requestDto.getContents();
+        this.mapdata = requestDto.getMapdata();
+        this.address = requestDto.getAddress();
+        this.telNum = requestDto.getTelNum();
+        this.ceo = requestDto.getCeo();
+        this.startTime = requestDto.getStartTime();
+        this.endTime = requestDto.getEndTime();
+        this.closedDay = requestDto.getClosedDay();
+        this.image = image;
+    }
 }
