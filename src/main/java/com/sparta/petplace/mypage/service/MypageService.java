@@ -96,18 +96,21 @@ public class MypageService {
         }
         if (requestDto.getImage() == null || requestDto.getImage().isEmpty()) {
             findMember.get().update(requestDto.getNickname());
-            return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "수정완료"));
+        } else {
+            if (findMember.get().getImage() != null) {
+                s3Service.deleteFile(findMember.get().getImage());
+            }
+            String image = null;
+            try {
+                image = s3Uploader.upload(requestDto.getImage(), requestDto.getImage().getOriginalFilename());
+            } catch (IOException e) {
+                throw new CustomException(Error.FAIL_S3_SAVE);
+            }
+            findMember.get().update(requestDto.getNickname(), image);
         }
-        s3Service.deleteFile(findMember.get().getImage());
-        String image = null;
-        try {
-            image = s3Uploader.upload(requestDto.getImage(), requestDto.getImage().getOriginalFilename());
-        } catch (IOException e) {
-            throw new CustomException(Error.FAIL_S3_SAVE);
-        }
-        findMember.get().update(requestDto.getNickname(), image);
         return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "수정완료"));
     }
+
 
 
     //유저 정보
