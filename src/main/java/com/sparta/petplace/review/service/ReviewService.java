@@ -4,6 +4,7 @@ import com.sparta.petplace.S3Service;
 import com.sparta.petplace.common.ApiResponseDto;
 import com.sparta.petplace.common.ResponseUtils;
 import com.sparta.petplace.common.SuccessResponse;
+import com.sparta.petplace.common.sse.service.NotificationService;
 import com.sparta.petplace.exception.CustomException;
 import com.sparta.petplace.exception.enumclass.Error;
 import com.sparta.petplace.member.entity.Member;
@@ -27,6 +28,7 @@ public class ReviewService {
     private final PostRepository postRepository;
     private final ReviewRepository reviewRepository;
     private final S3Service s3Service;
+    private final NotificationService notificationService;
     @Transactional
     public ApiResponseDto<ReviewResponseDto> createReview(Long post_id, ReviewRequestDto requestDto, Member member) {
         Post post = postRepository.findById(post_id).orElseThrow(
@@ -48,6 +50,12 @@ public class ReviewService {
             Review review = reviewRepository.save(new Review(requestDto, null, post, member));
             return ResponseUtils.ok(ReviewResponseDto.from(review));
         }
+
+        // 4. 댓글 생성시 작성자에게 알림 전송
+        String content = post.getMember().getNickname()+"님!" + post.getTitle() + " 게시글 리뷰 알림이 도착했어요!";
+        notificationService.send(post.getMember(), content, "testUrl");
+
+
         String image = s3Service.uploadMypage(requestDto.getImage());
         Review review = reviewRepository.save(new Review(requestDto, image, post, member));
         return ResponseUtils.ok(ReviewResponseDto.from(review));

@@ -19,7 +19,7 @@ public class ReviewController {
     @PostMapping("/{post_id}/review")
     public ApiResponseDto<ReviewResponseDto> createReview(@PathVariable Long post_id,
                                                           @ModelAttribute ReviewRequestDto requestDto,
-                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) throws Exception {
         return reviewService.createReview(post_id, requestDto, userDetails.getMember());
     }
 

@@ -15,7 +15,9 @@ public enum Error {
     NOT_FOUND_SEARCH("400", "검색 결과가 없습니다."),
     NO_AUTHORITY("400", "권한이 없습니다."),
     WRONG_TOKEN("400", "토큰 오류"),
+    NOT_VALIDURL("400","요효하지 않는 URL 입니다."),
     WRONG_BUSINESS("400", "사업자 번호를 입력해주세요"),
+    NOT_VALIDCONTENT("400","유효하지 않는 내용입니다."),
     WRONG_PASSWORD_CHECK( "400", "비밀번호 형식이 아닙니다"),
     VALIDATE_BUSINESS("400","사업자 번호가 일치하지 않습니다."),
     VALIDATE_EMAIL_ERROR( "400", "이메일 형식이 아닙니다."),
@@ -32,6 +34,8 @@ public enum Error {
     DELETE_S3_FILE("400","s3에 저장되었던 파일 삭제"),
     WRONG_IMAGE_FORMAT("400", "잘못된 포멧입니다."),
     WRONG_INPUT_CONTEN("400", "파일이 존재하지 않습니다."),
+
+    NOT_EXIST_NOTIFICATION("404","존재하지 않는 알림입니다."),
 
     // 409 CONFLICT 중복된 리소스
     DUPLICATED_EMAIL("409", "이미 존재하는 이메일입니다."),
