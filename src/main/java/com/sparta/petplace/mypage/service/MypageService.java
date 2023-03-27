@@ -65,8 +65,11 @@ public class MypageService {
                     .isLike(isLike)
                     .build());
         }
+
+
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), responseDtos.size());
+
         return new PageImpl<>(responseDtos.subList(start, end), pageable, responseDtos.size());
     }
 
@@ -94,12 +97,18 @@ public class MypageService {
         if (findMember.isEmpty()) {
             throw new CustomException(Error.NOT_EXIST_USER);
         }
+
         if (requestDto.getImage() == null || requestDto.getImage().isEmpty()) {
             findMember.get().update(requestDto.getNickname());
             return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "수정완료"));
         }
-        s3Service.deleteFile(findMember.get().getImage());
+
+        if (findMember.get().getImage() != null) {
+            s3Service.deleteFile(findMember.get().getImage());
+        }
+
         String image = null;
+
         try {
             image = s3Uploader.upload(requestDto.getImage(), requestDto.getImage().getOriginalFilename());
         } catch (IOException e) {
@@ -108,6 +117,19 @@ public class MypageService {
         findMember.get().update(requestDto.getNickname(), image);
         return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "수정완료"));
     }
+
+    @Transactional
+    public ApiResponseDto<SuccessResponse> modify(MypageModifyRequestDto requestDto, Member member, Long user_id) {
+        Optional<Member> findMember = memberRepository.findByEmail(member.getEmail());
+        if (requestDto.getImage() == null || requestDto.getImage().isEmpty()) {
+            findMember.get().update(requestDto.getNickname());
+            return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "수정완료"));
+        }
+        String image = s3Service.uploadMypage(requestDto.getImage());
+        findMember.get().update(requestDto.getNickname(), image);
+        return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "수정완료"));
+    }
+
 
 
     //유저 정보
