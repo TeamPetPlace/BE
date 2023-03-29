@@ -19,20 +19,20 @@ public class MypageController {
     private final MypageService mypageService;
 
 
-    //유저 정보
+    // 유저 프로필 정보 조회 [사업자,일반유저 공통]
     @GetMapping("/mypage")
     public ApiResponseDto<MemberResponseDto> member(@AuthenticationPrincipal UserDetailsImpl userDetails){
         return mypageService.getMember(userDetails.getMember());
     }
 
-    //유저 정보 수정
+    // 유저 프로필 정보 수정 [사업자,일반유저 공통]
     @PatchMapping("/mypage")
     public ApiResponseDto<SuccessResponse> modify(@ModelAttribute MypageModifyRequestDto requestDto,
                                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return mypageService.modify(requestDto, userDetails.getMember());
     }
 
-    //사업자가 작성한 게시글 조회
+    // 사업자가 본인이 작성한 게시글 조회 [사업자]
     @GetMapping("/mypage/business")
     public Page<PostResponseDto> getView (@AuthenticationPrincipal UserDetailsImpl userDetails,
                                           @RequestParam(value = "page") int page,
@@ -40,7 +40,7 @@ public class MypageController {
         return mypageService.getView(userDetails.getMember(), page, size);
     }
 
-    //찜한 게시글 보여주기
+    // 찜한 게시글 보여주기 [사업자,일반유저 공통]
     @GetMapping("/mypage/favorite")
     public Page<PostResponseDto> getSave(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                          @RequestParam(value = "page") int  page,
@@ -48,7 +48,7 @@ public class MypageController {
         return mypageService.getSave(userDetails.getMember(), page, size);
     }
 
-    //사용자 보여주기
+    // 사용자 리뷰 조회 [일반유저]
     @GetMapping("/review")
     public Page<ReviewResponseDto> getReview (@AuthenticationPrincipal UserDetailsImpl userDetails,
                                               @RequestParam(value = "page") int page,
@@ -57,9 +57,3 @@ public class MypageController {
     }
 
 }
-
-/*
-*           정의를 하면
-*           이미지 정렬
-*           이미지가 review 정렬
-* */

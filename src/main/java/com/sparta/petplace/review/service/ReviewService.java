@@ -4,8 +4,9 @@ import com.sparta.petplace.S3Service;
 import com.sparta.petplace.common.ApiResponseDto;
 import com.sparta.petplace.common.ResponseUtils;
 import com.sparta.petplace.common.SuccessResponse;
+import com.sparta.petplace.common.sse.service.NotificationService;
 import com.sparta.petplace.exception.CustomException;
-import com.sparta.petplace.exception.enumclass.Error;
+import com.sparta.petplace.exception.Error;
 import com.sparta.petplace.member.entity.Member;
 import com.sparta.petplace.post.entity.Post;
 import com.sparta.petplace.post.repository.PostRepository;
@@ -48,11 +49,19 @@ public class ReviewService {
             Review review = reviewRepository.save(new Review(requestDto, null, post, member));
             return ResponseUtils.ok(ReviewResponseDto.from(review));
         }
+
+        // 4. 댓글 생성시 작성자에게 알림 전송
+        String content = post.getMember().getNickname()+"님!" + post.getTitle() + " 게시글 리뷰 알림이 도착했어요!";
+        notificationService.send(post.getMember(), content, "testUrl");
+
+
         String image = s3Service.uploadMypage(requestDto.getImage());
         Review review = reviewRepository.save(new Review(requestDto, image, post, member));
         return ResponseUtils.ok(ReviewResponseDto.from(review));
     }
 
+
+    // 후기 수정
     @Transactional
     public ApiResponseDto<ReviewResponseDto> updateReview(Long review_id, ReviewRequestDto requestDto, Member member) {
         Review review = reviewRepository.findById(review_id).orElseThrow(
@@ -64,24 +73,18 @@ public class ReviewService {
         }
         if (review.getImage() != null) {
             s3Service.deleteFile(review.getImage());
-            if (requestDto.getImage() == null || requestDto.getImage().isEmpty()) {
-                review.update(requestDto, null, member);
-                return ResponseUtils.ok(ReviewResponseDto.from(review));
-            }
-            String image = s3Service.uploadMypage(requestDto.getImage());
-            review.update(requestDto, image, member);
+        }
+        if (requestDto.getImage() == null || requestDto.getImage().isEmpty()){
+            review.update(requestDto, null, member);
             return ResponseUtils.ok(ReviewResponseDto.from(review));
-        } else {
-            if (requestDto.getImage() == null || requestDto.getImage().isEmpty()) {
-                review.update(requestDto, null, member);
-                return ResponseUtils.ok(ReviewResponseDto.from(review));
-            }
+        }
             String image = s3Service.uploadMypage(requestDto.getImage());
             review.update(requestDto, image, member);
             return ResponseUtils.ok(ReviewResponseDto.from(review));
         }
-    }
 
+
+    // 후기 삭제
     public ApiResponseDto<SuccessResponse> deleteReview(Long review_id, Member member) {
         Review review = reviewRepository.findById(review_id).orElseThrow(
                 () -> new IllegalArgumentException("해당하는 후기가 존재하지 않습니다.")

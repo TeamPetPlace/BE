@@ -7,7 +7,7 @@ import com.sparta.petplace.common.ErrorResponse;
 import com.sparta.petplace.common.ResponseUtils;
 import com.sparta.petplace.common.SuccessResponse;
 import com.sparta.petplace.exception.CustomException;
-import com.sparta.petplace.exception.enumclass.Error;
+import com.sparta.petplace.exception.Error;
 import com.sparta.petplace.like.entity.Likes;
 import com.sparta.petplace.like.repository.LikesRepository;
 import com.sparta.petplace.member.entity.LoginType;
@@ -16,7 +16,6 @@ import com.sparta.petplace.member.entity.MemberHistory;
 import com.sparta.petplace.member.repository.MemberHistoryRepository;
 import com.sparta.petplace.member.repository.MemberRepository;
 import com.sparta.petplace.post.RequestDto.PostRequestDto;
-import com.sparta.petplace.post.ResponseDto.HistoryPostResponseDto;
 import com.sparta.petplace.post.ResponseDto.PostResponseDto;
 import com.sparta.petplace.post.entity.Post;
 import com.sparta.petplace.post.entity.PostImage;
@@ -65,40 +64,45 @@ public class PostService {
     private final S3Uploader s3Uploader;
 
 
-
-    //게시글 전체 조회
+    // 게시글 카테고리별 (전체)조회
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getPosts(String category, Sort sort, String lat, String lng, int page, int size, Member member) {
+
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
         Pageable pageable = PageRequest.of(page, size);
         List<Post> posts = postRepository.findByCategory(category);
-
+        //  위도, 경도
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
 
-
+        // PostResponseDto 생성
         buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng ,sort);
 
+        // 정렬 메서드
         sort(sort, postResponseDtos);
+
+        // 페이지네이션
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), postResponseDtos.size());
         return new PageImpl<>(postResponseDtos.subList(start, end), pageable, postResponseDtos.size());
     }
 
 
-    //메인 페이지 조회
+    // 메인 페이지 조회
     @Transactional(readOnly = true)
     public List<PostResponseDto> getMain(String category, String lat, String lng, Member member) {
+
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
         List<Post> posts = postRepository.findByCategory(category);
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
 
+        // PostResponseDto 생성
         buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng,Sort.DISTANCE);
-//        Collections.sort(postResponseDtos, Comparator.comparing(PostResponseDto::getDistance));
 
         List<PostResponseDto> mainResponseDto = new ArrayList<>();
         int i = 0;
+        //  최대 3개까지 표시되는 while문
         while (i < postResponseDtos.size() && i < 3) {
             mainResponseDto.add(postResponseDtos.get(i));
             i++;
@@ -108,7 +112,6 @@ public class PostService {
 
 
     // 게시글 작성
-
     @Transactional
     public ApiResponseDto<PostResponseDto> createPost(PostRequestDto requestDto, Member member) {
         Optional<Member> member1 = memberRepository.findByEmail(member.getEmail());
@@ -137,7 +140,7 @@ public class PostService {
             postImageRepository.save(img);
             imgList.add(image);
         }
-
+        // s3 이미지 업로드 try - catch
         try {
             String d = s3Uploader.upload(resizeImage(requestDto.getImage().get(0)), requestDto.getImage().get(0).getOriginalFilename());
             posts.setResizeImage(d);
@@ -148,8 +151,8 @@ public class PostService {
         return ResponseUtils.ok(PostResponseDto.from(posts, imgList));
     }
 
-    //게시글 이름 중복 확인
 
+    // 게시글 이름 중복 확인
     @Transactional(readOnly = true)
     public ApiResponseDto<SuccessResponse> postCheck(String title) {
         Optional<Post> findPost = postRepository.findByTitle(title);
@@ -160,9 +163,9 @@ public class PostService {
     }
 
 
-    //게시글 상세 조회
+    // 게시글 상세 조회
     @Transactional
-    public PostResponseDto getPostId(Long post_id, Member member) {
+    public ApiResponseDto<PostResponseDto> getPostId(Long post_id, Member member) {
         Post posts = postRepository.findById(post_id).orElseThrow(
                 () -> new CustomException(Error.NOT_FOUND_POST)
         );
@@ -173,6 +176,7 @@ public class PostService {
 
         Integer reviewStar = 0;
         int count = 0;
+        // 리뷰 평점 계산
         for (Review r : posts.getReviews()) {
             reviewStar += r.getStar();
             count += 1;
@@ -185,48 +189,34 @@ public class PostService {
 
         PostResponseDto postResponseDto = PostResponseDto.of(posts, images, likes != null, count, starAvr);
 
-
         List<MemberHistory> memberHistories = memberHistoryRepository.findTop3ByMemberOrderByCreatedAtDesc(member);
+
         // findFirst(): filter를 통과한 첫 번째 요소를 찾음. findFirst는 Optional<MemberHistory> 타입을 반환하며, 조건에 맞는 요소가 없는 경우 Optional.empty()를 반환
         Optional<MemberHistory> existingHistory = memberHistories.stream()
                 .filter(history -> history.getPost().getId().equals(post_id))
                 .findFirst();
 
-
-
-
+        // 중복등록 될 경우 삭제 후 업데이트
         if (existingHistory.isPresent()) {
             MemberHistory historyToDelete = existingHistory.get();
             memberHistoryRepository.delete(historyToDelete);
 
             MemberHistory newHistory = MemberHistory.of(member, posts, new Date());
             memberHistoryRepository.save(newHistory);
+
+            // 사이즈 3개보다 크다면 순서대로 가장 오래된 게시글 삭제 후 새로운 게시글 등록
         } else {
             if (memberHistories.size() >= 3) {
                 MemberHistory oldestHistory = memberHistories.get(memberHistories.size() - 1);
                 memberHistoryRepository.delete(oldestHistory);
             }
-
             memberHistoryRepository.save(MemberHistory.of(member, posts, new Date()));
         }
-
-        return  postResponseDto;
-
+        return ResponseUtils.ok(postResponseDto);
     }
 
 
-    // 히스토리 게시글 불러오기
-    public HistoryPostResponseDto getPostIfoNoHistory(Long post_id) {
-        Post posts = postRepository.findById(post_id).orElseThrow(
-                () -> new CustomException(Error.NOT_FOUND_POST)
-        );
-        return HistoryPostResponseDto.of(posts);
-    }
-
-
-
-
-    //게시글 수정
+    // 게시글 수정
     @Transactional
     public ApiResponseDto<?> updatePost(Long post_id, PostRequestDto requestDto, Member member) {
         Optional<Post> postOptional = postRepository.findById(post_id);
@@ -236,35 +226,28 @@ public class PostService {
         }
         Post post = postOptional.get();
         if (post.getMember().getEmail().equals(member.getEmail())) {
-
+            //  기존이미지 삭제
             for (PostImage postImage : post.getImage()) {
                 s3Service.deleteFile(postImage.getImage());
                 postImageRepository.delete(postImage);
             }
-
-            List<String> imgList = new ArrayList<>();
+            List<PostImage> postImages = new ArrayList<>();
             List<String> img_url = s3Service.upload(requestDto.getImage());
+            //  이미지 Repository 를 통해 DB에 저장
             for (String image : img_url) {
                 PostImage img = new PostImage(post, image);
                 postImageRepository.save(img);
-                imgList.add(image);
+                postImages.add(img);
             }
-
-            List<PostImage> postImages = new ArrayList<>();
-            for (String image : imgList) {
-                PostImage postImage = new PostImage(post, image);
-                postImages.add(postImage);
-            }
-
             post.update(requestDto, postImages, post.getStar());
-            return ResponseUtils.ok(PostResponseDto.of(post));
+            return ResponseUtils.ok(PostResponseDto.from(post, img_url) );
         } else {
             return ResponseUtils.ok(ErrorResponse.of(HttpStatus.BAD_REQUEST.toString(), "작성자만 게시물을 수정할 수 있습니다."));
         }
     }
 
-    //게시글 삭제
 
+    //게시글 삭제
     @Transactional
     public ApiResponseDto<SuccessResponse> deletePost(Long post_id, Member member) {
         Optional<Post> postOptional = postRepository.findById(post_id);
@@ -279,16 +262,20 @@ public class PostService {
             s3Service.deleteFile(postImage.getImage());
             postImageRepository.delete(postImage);
         }
+        memberHistoryRepository.deleteByPostId(post_id);
         reviewRepository.deleteByPostId(post_id);
         likesRepository.deleteByPostId(post_id);
         postRepository.deleteById(post_id);
         return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, " 게시글 삭제 성공"));
     }
 
+
+    // 게시글 검색 조회
     @Transactional(readOnly = true)
     public ApiResponseDto<List<PostResponseDto>> searchPost(String category, String keyword, Sort sort, String lat, String lng, Member member) {
-        log.info(category);
+
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
+        // QueryDSL 사용
         List<Post> posts = postRepository.search(category, keyword);
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
@@ -296,24 +283,18 @@ public class PostService {
         if (posts.isEmpty()) {
             throw new CustomException(Error.NOT_FOUND_POST);
         }
-
         buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng,sort);
-
-        log.info(postResponseDtos.get(0).getCategory());
-
-//        sort(sort, postResponseDtos);
-
         return ResponseUtils.ok(postResponseDtos);
-
     }
 
 
     //리뷰 페이지네이션
     public Page<ReviewResponseDto> getPostInfo(Long post_id, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page-1, size);
         Post posts = postRepository.findById(post_id).orElseThrow(
                 () -> new CustomException(Error.NOT_FOUND_POST)
         );
+        // 최신순 정렬
         posts.getReviews().sort(Comparator.comparing(Review::getCreatedAt).reversed());
         List<ReviewResponseDto> reviewResponseDtos = new ArrayList<>();
         for (Review r : posts.getReviews()) {
@@ -322,22 +303,16 @@ public class PostService {
 
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), reviewResponseDtos.size());
-
-
         return new PageImpl<>(reviewResponseDtos.subList(start, end), pageable, reviewResponseDtos.size());
 
     }
 
 
-
-
-
     // ==================================== Method Extract ====================================
 
 
-
     //거리구하기
-    public static double distance(double lat1, double lon1, double lat2, double lon2) {
+    private double distance(double lat1, double lon1, double lat2, double lon2) {
         double R = 6371; // 지구 반지름
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);
@@ -350,12 +325,14 @@ public class PostService {
     }
 
 
+    // PostResponseDto 셍성
     private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
         for (Post p : posts) {
             Double postLat = Double.parseDouble(p.getLat());
             Double postLng = Double.parseDouble(p.getLng());
             double distance = distance(usrtLat, usrtLng, postLat, postLng);
             p.getReviews().sort(Comparator.comparing(Review::getCreatedAt).reversed());
+            log.info("정렬 완료");
             List<ReviewResponseDto> reviewResponseDtos = new ArrayList<>();
             Integer reviewStar = 0;
             int count = 0;
@@ -363,10 +340,12 @@ public class PostService {
                 reviewResponseDtos.add(ReviewResponseDto.from(r));
                 reviewStar += r.getStar();
                 count += 1;
+                log.info(p.getCategory(),"for문 성공");
             }
             int starAvr = 0;
             if (count != 0) {
                 starAvr = Math.round(reviewStar / count);
+                log.info("if문 count 가 0이 아닐때");
             }
 
             Likes likes = likesRepository.findByPostIdAndMemberId(p.getId(), member.getId());
@@ -380,11 +359,13 @@ public class PostService {
                     .build());
         }
         sort(sort , postResponseDtos);
+        log.info("sort 성공");
 
     }
 
 
-    public File resizeImage(MultipartFile file) throws IOException {
+    // 이미지 리사이징
+    private File resizeImage(MultipartFile file) throws IOException {
         log.info(file.getContentType());
 
         BufferedImage originalImage = ImageIO.read(file.getInputStream());
@@ -392,7 +373,7 @@ public class PostService {
         int originWidth = originalImage.getWidth();
         int originHeight = originalImage.getHeight();
 
-        int newWidth = 220;
+        int newWidth = 400;
         int newHeight = 0;
         if (originWidth > newWidth) {
             newHeight = (originHeight * newWidth) / originWidth;
@@ -425,6 +406,7 @@ public class PostService {
     }
 
 
+   // 정렬방법 결정
     private void sort(Sort sort, List<PostResponseDto> postResponseDtos) {
         switch (sort) {
             case STAR:

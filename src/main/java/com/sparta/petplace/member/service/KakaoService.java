@@ -10,7 +10,6 @@ import com.sparta.petplace.auth.jwt.RefreshTokenRepository;
 import com.sparta.petplace.auth.jwt.TokenDto;
 import com.sparta.petplace.common.ApiResponseDto;
 import com.sparta.petplace.common.ResponseUtils;
-import com.sparta.petplace.common.SuccessResponse;
 import com.sparta.petplace.member.dto.LoginResponseDto;
 import com.sparta.petplace.member.dto.SocialUserInfoDto;
 import com.sparta.petplace.member.entity.LoginType;
@@ -18,7 +17,10 @@ import com.sparta.petplace.member.entity.Member;
 import com.sparta.petplace.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -35,10 +37,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class KakaoService {
+
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
+
 
     public ApiResponseDto<LoginResponseDto> kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
         // 1. "인가 코드"로 "액세스 토큰" 요청
@@ -53,6 +57,7 @@ public class KakaoService {
         // 4. JWT 토큰 반환
         TokenDto tokenDto = jwtUtil.createAllToken(member.getEmail());
 
+        //  Member Email값으로 refreshToken을 찾는다
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findAllByMemberId(member.getEmail());
 
         if(refreshToken.isPresent()) {
@@ -66,9 +71,9 @@ public class KakaoService {
         return ResponseUtils.ok(LoginResponseDto.of(member.getNickname(), member.getLoginType()));
     }
 
+
     // 1. "인가 코드"로 "액세스 토큰" 요청
     private String getToken(String code) throws JsonProcessingException {
-
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
@@ -76,7 +81,8 @@ public class KakaoService {
         // HTTP Body 생성
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
-        body.add("client_id", "bdb9f0d03a95450cca094def1b12464f"); //REST API KEY
+        //REST API KEY
+        body.add("client_id", "bdb9f0d03a95450cca094def1b12464f");
         body.add("redirect_uri", "http://localhost:3000/Redirect");
         body.add("code", code);
 
@@ -102,6 +108,7 @@ public class KakaoService {
         JsonNode jsonNode = objectMapper.readTree(responseBody);
         return jsonNode.get("access_token").asText();
     }
+
 
     // 2. 토큰으로 카카오 API 호출 : "액세스 토큰"으로 "카카오 사용자 정보" 가져오기
     private SocialUserInfoDto getKakaoUserInfo(String accessToken) throws JsonProcessingException {
@@ -139,6 +146,7 @@ public class KakaoService {
         log.info("카카오 사용자 정보: " + id + ", " + nickname + ", " + email);
         return new SocialUserInfoDto(id, nickname, email);
     }
+
 
     // 3. 필요시에 회원가입
     private Member registerKakaoUserIfNeeded(SocialUserInfoDto userInfo) {
