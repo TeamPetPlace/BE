@@ -9,6 +9,7 @@ import com.sparta.petplace.like.repository.LikesRepository;
 import com.sparta.petplace.post.entity.Post;
 import com.sparta.petplace.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,7 @@ public class LikesService {
             Likes found = Likes.of(userDetails.getMember(),post);
             likesRepository.save(found);
         }
-        return ResponseUtils.ok(LikesResponseDto.of(true, "찜", 200));
+        return ResponseUtils.ok(LikesResponseDto.of(true, "찜",HttpStatus.OK));
     }
 
     //게시글 찜히기 취소
@@ -40,7 +41,7 @@ public class LikesService {
         if(!likes.isEmpty()){
             likesRepository.delete(likes.get());
         }
-        return ResponseUtils.ok(LikesResponseDto.of(false, "취소", 200));
+        return ResponseUtils.ok(LikesResponseDto.of(false, "취소", HttpStatus.OK));
     }
 
     // ======== 메서드 ========

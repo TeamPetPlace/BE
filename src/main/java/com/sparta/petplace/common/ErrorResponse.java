@@ -1,6 +1,6 @@
 package com.sparta.petplace.common;
 
-import com.sparta.petplace.exception.enumclass.Error;
+import com.sparta.petplace.exception.Error;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

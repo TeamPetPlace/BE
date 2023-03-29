@@ -72,9 +72,17 @@ public class PostResponseDto {
         this.star = star;
     }
 
+
     public static PostResponseDto of(Post post){
         return PostResponseDto.builder()
                 .post(post)
+                .build();
+    }
+
+    public static PostResponseDto of(Post post, Integer star){
+        return PostResponseDto.builder()
+                .post(post)
+                .star(star)
                 .build();
     }
     public static PostResponseDto from(Post post,List<String> image){

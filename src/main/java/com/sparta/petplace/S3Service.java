@@ -10,7 +10,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.sparta.petplace.exception.CustomException;
-import com.sparta.petplace.exception.enumclass.Error;
+import com.sparta.petplace.exception.Error;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

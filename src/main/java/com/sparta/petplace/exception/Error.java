@@ -1,4 +1,4 @@
-package com.sparta.petplace.exception.enumclass;
+package com.sparta.petplace.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

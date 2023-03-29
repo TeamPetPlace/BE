@@ -36,7 +36,7 @@ public class WebSecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         // h2-console 사용 및 resources 접근 허용 설정
         return (web) -> web.ignoring()
-//                .requestMatchers(PathRequest.toH2Console())
+                // .requestMatchers(PathRequest.toH2Console())
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
@@ -45,28 +45,35 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+        // CORS 문제 해결
         http.cors().configurationSource(request -> {
             CorsConfiguration cors = new CorsConfiguration();
-
+            //  모든 패턴 허용
             cors.setAllowedOriginPatterns(List.of("*"));
-
+            //  API 메서드 허용 범위
             cors.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+            //  Headers 모든 값
             cors.setAllowedHeaders(List.of("*"));
+            //  header token "Authorization"값 허용
             cors.addExposedHeader("Authorization");
+            //  header token "Refresh_Token"값 허용
             cors.addExposedHeader("Refresh_Token");
+            //  내 서버가 응답할 때 json을 JS에서 처리할 수 있게 하려면 설정 (허용하려면 true)
+            //  사용자 자격증명과 함께 요청 여부 (Authorization로 사용자 인증 사용 시 true)
             cors.setAllowCredentials(true);
             return cors;
         });
-
-        http.csrf().disable(); // CSRF 방어 기능을 비활성화한다.
+        // CSRF 기능을 비활성화한다.
+        http.csrf().disable();
         http.headers().frameOptions().disable();
         http.authorizeRequests()
-                .antMatchers("/h2-console/**").permitAll(); // 누구나 h2-console 접속 허용
+                // 누구나 h2-console 접속 허용
+                .antMatchers("/h2-console/**").permitAll();
 
         // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-        http.authorizeRequests() //  요청에 대한 보안 검사를 구성한다.
+        //  요청에 대한 보안 검사를 구성한다.
+        http.authorizeRequests()
                 .antMatchers("/**").permitAll()
 
                 //  Spring Security 필터 체인을 구성하는 인터페이스다.
@@ -75,9 +82,9 @@ public class WebSecurityConfig {
                 // JwtAuthFilter를 UsernamePasswordAuthenticationFilter 이전에 실행되도록 설정한다. JwtAuthFilter는 JWT 토큰을 검증하고 인증/인가를 처리한다.
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
-//        http.formLogin().loginPage("/api/user/login-page").permitAll(); //로그인 페이지를 설정한다
-//
-//        http.exceptionHandling().accessDeniedPage("/api/user/forbidden");
+        // 로그인 페이지를 설정한다
+        // http.formLogin().loginPage("/api/user/login-page").permitAll();
+        // http.exceptionHandling().accessDeniedPage("/api/user/forbidden");
 
         return http.build();
 

@@ -1,7 +1,7 @@
 package com.sparta.petplace.common.sse.entity;
 
 import com.sparta.petplace.exception.CustomException;
-import com.sparta.petplace.exception.enumclass.Error;
+import com.sparta.petplace.exception.Error;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

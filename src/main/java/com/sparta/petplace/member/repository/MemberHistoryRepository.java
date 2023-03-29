@@ -8,4 +8,7 @@ import java.util.List;
 
 public interface MemberHistoryRepository extends JpaRepository<MemberHistory, Long> {
     List<MemberHistory> findTop3ByMemberOrderByCreatedAtDesc(Member member);
+
+    void deleteByPostId(Long postId);
+
 }

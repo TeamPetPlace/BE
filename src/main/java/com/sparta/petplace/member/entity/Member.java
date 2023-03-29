@@ -31,6 +31,7 @@ public class Member {
     private LoginType loginType;
 
 
+
     @Builder
     public Member(String email,String password, String nickname, String business,String image,LoginType loginType){
         this.email = email;
@@ -45,7 +46,7 @@ public class Member {
         this.loginType = loginType;
     }
 
-    public static Member of (String email, String password, String nickname, String business, LoginType loginType,String image) {
+    public static Member of (String email, String password, String nickname, String business, LoginType loginType,String image ) {
         return Member.builder()
                 .email(email)
                 .password(password)
