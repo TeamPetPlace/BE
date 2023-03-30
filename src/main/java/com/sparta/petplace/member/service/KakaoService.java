@@ -83,27 +83,21 @@ public class KakaoService {
         body.add("grant_type", "authorization_code");
         //REST API KEY
         body.add("client_id", "bdb9f0d03a95450cca094def1b12464f");
-        body.add("redirect_uri", "http://localhost:3000/Redirect");
+        body.add("redirect_uri", "https://fe-fawn.vercel.app/kakao/callback");
         body.add("code", code);
 
         // HTTP 요청 보내기
         HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest = new HttpEntity<>(body, headers);
         RestTemplate rt = new RestTemplate();
-        String responseBody;
-        try {
-            ResponseEntity<String> response = rt.exchange(
-                    "https://kauth.kakao.com/oauth/token",
-                    HttpMethod.POST,
-                    kakaoTokenRequest,
-                    String.class
-            );
-            responseBody = response.getBody();
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            String errorMessage = e.getResponseBodyAsString();
-            log.error("HTTP error occurred: " + errorMessage, e);
-            throw new RuntimeException("Failed to retrieve access token");
-        }
+        ResponseEntity<String> response = rt.exchange(
+                "https://kauth.kakao.com/oauth/token",
+                HttpMethod.POST,
+                kakaoTokenRequest,
+                String.class
+        );
 
+        // HTTP 응답 (JSON) -> 액세스 토큰 파싱
+        String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(responseBody);
         return jsonNode.get("access_token").asText();
@@ -120,20 +114,14 @@ public class KakaoService {
         // HTTP 요청 보내기
         HttpEntity<MultiValueMap<String, String>> kakaoUserInfoRequest = new HttpEntity<>(headers);
         RestTemplate rt = new RestTemplate();
-        String responseBody ;
-        try {
-            ResponseEntity<String> response = rt.exchange(
-                    "https://kapi.kakao.com/v2/user/me",
-                    HttpMethod.POST,
-                    kakaoUserInfoRequest,
-                    String.class
-            );
-            responseBody = response.getBody();
-        }catch (HttpClientErrorException | HttpServerErrorException e) {
-            String errorMessage = e.getResponseBodyAsString();
-            log.error("HTTP error occurred: " + errorMessage, e);
-            throw new RuntimeException("Failed to retrieve access token");
-        }
+        ResponseEntity<String> response = rt.exchange(
+                "https://kapi.kakao.com/v2/user/me",
+                HttpMethod.POST,
+                kakaoUserInfoRequest,
+                String.class
+        );
+
+        String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(responseBody);
 

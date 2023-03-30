@@ -28,6 +28,8 @@ public class ReviewService {
     private final PostRepository postRepository;
     private final ReviewRepository reviewRepository;
     private final S3Service s3Service;
+    private final NotificationService notificationService;
+
     @Transactional
     public ApiResponseDto<ReviewResponseDto> createReview(Long post_id, ReviewRequestDto requestDto, Member member) {
         Post post = postRepository.findById(post_id).orElseThrow(
