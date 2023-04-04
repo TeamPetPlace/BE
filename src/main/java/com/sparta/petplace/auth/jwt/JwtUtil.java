@@ -29,7 +29,7 @@ public class JwtUtil {
 
     private final RefreshTokenRepository refreshTokenRepository;
     public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String REFRESH_TOKEN = "Refresh_Token";
+    public static final String REFRESH_TOKEN = "RefreshToken";
     public static final String AUTHORIZATION_KEY = "auth";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final long TOKEN_TIME = 60 * 60 * 1000L;
