@@ -13,6 +13,7 @@ import com.sparta.petplace.common.sse.repository.NotificationRepository;
 import com.sparta.petplace.member.entity.Member;
 import com.sparta.petplace.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
