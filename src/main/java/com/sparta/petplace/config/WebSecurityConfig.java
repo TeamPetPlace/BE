@@ -75,6 +75,7 @@ public class WebSecurityConfig {
         //  요청에 대한 보안 검사를 구성한다.
         http.authorizeRequests()
                 .antMatchers("/**").permitAll()
+                .antMatchers("/kakao/**").permitAll()
 
                 //  Spring Security 필터 체인을 구성하는 인터페이스다.
                 .anyRequest().authenticated()
