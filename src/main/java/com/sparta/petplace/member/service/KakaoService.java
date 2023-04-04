@@ -10,7 +10,6 @@ import com.sparta.petplace.auth.jwt.RefreshTokenRepository;
 import com.sparta.petplace.auth.jwt.TokenDto;
 import com.sparta.petplace.common.ApiResponseDto;
 import com.sparta.petplace.common.ResponseUtils;
-import com.sparta.petplace.member.dto.LoginResponseDto;
 import com.sparta.petplace.member.dto.SocialUserInfoDto;
 import com.sparta.petplace.member.entity.LoginType;
 import com.sparta.petplace.member.entity.Member;
@@ -86,6 +85,8 @@ public class KakaoService {
         //REST API KEY
         body.add("client_id", "bdb9f0d03a95450cca094def1b12464f");
         body.add("redirect_uri", "https://fe-fawn.vercel.app/kakao/callback");
+        body.add("redirect_uri", "https://petplace.site/kakao/callback");
+        body.add("redirect_uri", "http://localhost:3000/kakao/callback");
         body.add("code", code);
 
 
