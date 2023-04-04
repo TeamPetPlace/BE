@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
@@ -68,6 +67,7 @@ public class KakaoService {
             RefreshToken newToken = new RefreshToken(tokenDto.getRefresh_Token(), member.getEmail());
             refreshTokenRepository.save(newToken);
         }
+        jwtUtil.setHeader(response, tokenDto);
 
 
         return ResponseUtils.ok(SocialUserInfoDto.of(member.getNickname(), member.getEmail(), member.getLoginType()));
