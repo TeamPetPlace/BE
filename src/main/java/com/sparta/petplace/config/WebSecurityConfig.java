@@ -57,7 +57,7 @@ public class WebSecurityConfig {
             //  header token "Authorization"값 허용
             cors.addExposedHeader("Authorization");
             //  header token "Refresh_Token"값 허용
-            cors.addExposedHeader("Refresh_Token");
+            cors.addExposedHeader("RefreshToken");
             //  내 서버가 응답할 때 json을 JS에서 처리할 수 있게 하려면 설정 (허용하려면 true)
             //  사용자 자격증명과 함께 요청 여부 (Authorization로 사용자 인증 사용 시 true)
             cors.setAllowCredentials(true);
