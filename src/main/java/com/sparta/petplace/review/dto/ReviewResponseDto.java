@@ -16,6 +16,7 @@ public class ReviewResponseDto {
     private String email;
     private Integer star;
     private String review;
+    private String memberImage;
     private String image;
     private String nickname;
     private Long postId;
@@ -35,6 +36,7 @@ public class ReviewResponseDto {
         this.createdAt = review.getCreatedAt();
         this.modifiedAt = review.getModifiedAt();
         this.postId = review.getPost().getId();
+        this.memberImage = review.getMember().getImage();
     }
 
     public static ReviewResponseDto from(Review review) {

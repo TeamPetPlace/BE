@@ -13,6 +13,7 @@ public class QuerydslConfiguration {
     @PersistenceContext
     private EntityManager entityManager;
 
+    //   JPAQueryFactory 정의 메소드 ( 컨테이너 생성하기 위한 메서드 )
     @Bean
     public JPAQueryFactory jpaQueryFactory() {
         return new JPAQueryFactory(entityManager);

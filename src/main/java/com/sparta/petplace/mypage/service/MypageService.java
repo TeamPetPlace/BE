@@ -5,7 +5,7 @@ import com.sparta.petplace.common.ApiResponseDto;
 import com.sparta.petplace.common.ResponseUtils;
 import com.sparta.petplace.common.SuccessResponse;
 import com.sparta.petplace.exception.CustomException;
-import com.sparta.petplace.exception.enumclass.Error;
+import com.sparta.petplace.exception.Error;
 import com.sparta.petplace.like.entity.Likes;
 import com.sparta.petplace.like.repository.LikesRepository;
 import com.sparta.petplace.member.dto.MemberResponseDto;
@@ -46,7 +46,7 @@ public class MypageService {
     private final S3Uploader s3Uploader;
 
 
-    //사업자 마이페이지 조회
+    // 사업자가 본인이 작성한 게시글 조회 [사업자]
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getView(Member member, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -55,84 +55,80 @@ public class MypageService {
             throw new CustomException(Error.NOT_FOUND_POST);
         }
         List<PostResponseDto> responseDtos = new ArrayList<>();
-
         for (Post post : found) {
-
+            int count = 0;
+            if (!post.getReviews().isEmpty()) {
+                count = post.getReviews().size();
+            }
             Likes likes = likesRepository.findByPostIdAndMemberId(post.getId(), member.getId());
             boolean isLike = likes != null;
             responseDtos.add(PostResponseDto.builder()
                     .post(post)
                     .isLike(isLike)
+                    .reviewCount(count)
                     .build());
         }
-
-
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), responseDtos.size());
-
         return new PageImpl<>(responseDtos.subList(start, end), pageable, responseDtos.size());
     }
 
 
-    //찜한거 보여주기
+    // 찜한 게시글 보여주기 [사업자,일반유저 공통]
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getSave(Member member, int page, int size) {
-
-        Pageable pageable = PageRequest.of(page, size);
+        log.info("getSave 메서드");
+        Pageable pageable = PageRequest.of(page - 1, size);
 
         List<Likes> mypageList = likesRepository.findByMemberId(member.getId());
         List<PostResponseDto> responseDtoList = new ArrayList<>();
-        for (Likes mypage : mypageList)
-            responseDtoList.add(PostResponseDto.of(mypage.getPost()));
+        for (Likes mypage : mypageList) {
+            Integer reviewStar = 0;
+            int count = 0;
+            int starAvr = 0;
+            if (!mypage.getPost().getReviews().isEmpty()) {
+                for (Review r : mypage.getPost().getReviews()) {
+                    reviewStar += r.getStar();
+                    count += 1;
+                }
+                if (count != 0) {
+                    starAvr = Math.round(reviewStar / count);
+                }
+            }
+            responseDtoList.add(PostResponseDto.of(mypage.getPost(), starAvr));
+        }
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), responseDtoList.size());
         return new PageImpl<>(responseDtoList.subList(start, end), pageable, responseDtoList.size());
     }
 
 
-    //유저정보 수정
+    // 유저 프로필 정보 수정 [사업자,일반유저 공통]
     @Transactional
     public ApiResponseDto<SuccessResponse> modify(MypageModifyRequestDto requestDto, Member member) {
         Optional<Member> findMember = memberRepository.findByEmail(member.getEmail());
         if (findMember.isEmpty()) {
             throw new CustomException(Error.NOT_EXIST_USER);
         }
-
         if (requestDto.getImage() == null || requestDto.getImage().isEmpty()) {
             findMember.get().update(requestDto.getNickname());
-            return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "수정완료"));
+        } else {
+            if (findMember.get().getImage() != null) {
+                s3Service.deleteFile(findMember.get().getImage());
+            }
+            String image = null;
+            try {
+                image = s3Uploader.upload(requestDto.getImage(), requestDto.getImage().getOriginalFilename());
+            } catch (IOException e) {
+                throw new CustomException(Error.FAIL_S3_SAVE);
+            }
+            findMember.get().update(requestDto.getNickname(), image);
         }
-
-        if (findMember.get().getImage() != null) {
-            s3Service.deleteFile(findMember.get().getImage());
-        }
-
-        String image = null;
-
-        try {
-            image = s3Uploader.upload(requestDto.getImage(), requestDto.getImage().getOriginalFilename());
-        } catch (IOException e) {
-            throw new CustomException(Error.FAIL_S3_SAVE);
-        }
-        findMember.get().update(requestDto.getNickname(), image);
-        return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "수정완료"));
-    }
-
-    @Transactional
-    public ApiResponseDto<SuccessResponse> modify(MypageModifyRequestDto requestDto, Member member, Long user_id) {
-        Optional<Member> findMember = memberRepository.findByEmail(member.getEmail());
-        if (requestDto.getImage() == null || requestDto.getImage().isEmpty()) {
-            findMember.get().update(requestDto.getNickname());
-            return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "수정완료"));
-        }
-        String image = s3Service.uploadMypage(requestDto.getImage());
-        findMember.get().update(requestDto.getNickname(), image);
         return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "수정완료"));
     }
 
 
-
-    //유저 정보
+    // 유저 프로필 정보 조회 [사업자,일반유저 공통]
     public ApiResponseDto<MemberResponseDto> getMember(Member member) {
         Optional<Member> found = memberRepository.findByEmail(member.getEmail());
         if (found.isEmpty()) {
@@ -143,10 +139,10 @@ public class MypageService {
     }
 
 
-    //사용자 정보
+    // 사용자 리뷰 조회 [일반유저]
     public Page<ReviewResponseDto> getReview(Member member, int page, int size) {
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
 
         List<Review> review = reviewRepository.findAllByMemberId(member.getId());
 
@@ -154,9 +150,9 @@ public class MypageService {
         if (review.isEmpty()) {
             throw new CustomException(Error.NOT_FOUND_POST);
         }
-            for (Review r : review) {
-                responseDtoList.add(ReviewResponseDto.from(r));
-            }
+        for (Review r : review) {
+            responseDtoList.add(ReviewResponseDto.from(r));
+        }
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), responseDtoList.size());
         return new PageImpl<>(responseDtoList.subList(start, end), pageable, responseDtoList.size());

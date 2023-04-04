@@ -70,7 +70,6 @@ public class Post extends Timestamped {
     private Member member;
 
 
-
     @Builder
     public Post(PostRequestDto requestDto, Member member , Integer star, String resizeImage ) {
         this.email = member.getEmail();

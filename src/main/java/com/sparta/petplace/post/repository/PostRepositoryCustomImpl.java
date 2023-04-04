@@ -18,6 +18,7 @@ public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implemen
         this.queryFactory = queryFactory;
     }
 
+
     @Override
     public List<Post> search(String category, String keyword){
         return queryFactory.selectFrom(post)

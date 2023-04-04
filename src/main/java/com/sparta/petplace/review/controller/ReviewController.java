@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.*;
 public class ReviewController {
     private final ReviewService reviewService;
 
-    //후기 작성
+
+    // 후기 작성
     @PostMapping("/{post_id}/review")
     public ApiResponseDto<ReviewResponseDto> createReview(@PathVariable Long post_id,
                                                           @ModelAttribute ReviewRequestDto requestDto,
@@ -23,7 +24,8 @@ public class ReviewController {
         return reviewService.createReview(post_id, requestDto, userDetails.getMember());
     }
 
-    //후기 수정
+
+    // 후기 수정
     @PutMapping("/review/{review_id}")
     public ApiResponseDto<ReviewResponseDto> updateReview(@PathVariable Long review_id,
                                                           @ModelAttribute ReviewRequestDto requestDto,
@@ -31,11 +33,11 @@ public class ReviewController {
         return reviewService.updateReview(review_id, requestDto, userDetails.getMember());
     }
 
-    //후기 삭제
+
+    // 후기 삭제
     @DeleteMapping("/review/{review_id}")
     public ApiResponseDto<SuccessResponse> deleteReview(@PathVariable Long review_id,
                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reviewService.deleteReview(review_id, userDetails.getMember());
     }
-
 }

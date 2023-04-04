@@ -25,8 +25,8 @@ public class PostController {
 
    private final PostService postService;
 
-   // TODO: 2023/03/17 올리기전에 프론트에 키워드 -> 카테고리 로 바꾼거 말해주기 , sort 추가한거도 말해주기
-   //게시글 전체 조회
+
+   // 게시글 전체 조회
    @GetMapping("/category")
    public Page<PostResponseDto> getPosts(@RequestParam(value = "category") String category,
                                          @RequestParam(value = "sort") Sort sort,
@@ -39,14 +39,15 @@ public class PostController {
    }
 
 
-   //게시글 상세 조회
+   // 게시글 상세 조회
    @GetMapping("/{post_id}")
-   private PostResponseDto getPostId(@PathVariable Long post_id ,
+   private ApiResponseDto<PostResponseDto> getPostId(@PathVariable Long post_id ,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
       return postService.getPostId(post_id,userDetails.getMember());
    }
 
 
+   // 리뷰 페이지네이션
    @GetMapping("/{post_id}/review")
    private Page<ReviewResponseDto> getPostInfo(@PathVariable Long post_id ,
                                          @RequestParam(value = "page") int page,
@@ -55,6 +56,7 @@ public class PostController {
    }
 
 
+   // 메인페이지
    @GetMapping("/topPosts")
    public List<PostResponseDto> getMains(@RequestParam(value = "category") String category,
                                          @RequestParam(value = "lat") String lat,
@@ -64,14 +66,14 @@ public class PostController {
    }
 
 
-   //게시글 이름 중복 확인
+   // 게시글 이름 중복 확인
    @GetMapping("/check_duplicate")
    public ApiResponseDto<SuccessResponse> postCheck(@RequestParam(value = "title") String title){
       return postService.postCheck(title);
    }
 
 
-   //게시글 작성
+   // 게시글 작성
    @PostMapping("/write")
    public ApiResponseDto<PostResponseDto> createPost(@ModelAttribute() PostRequestDto requestDto,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
@@ -79,20 +81,21 @@ public class PostController {
    }
 
 
-   //게시글 수정
+   // 게시글 수정
    @PatchMapping("/{post_id}")
    public ApiResponseDto<?> updePost(@PathVariable Long post_id , PostRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
       return postService.updatePost(post_id,requestDto,userDetails.getMember());
    }
 
 
-   //게시글 삭제
+   // 게시글 삭제
    @DeleteMapping("/{post_id}")
    public ApiResponseDto<SuccessResponse> deletePost(@PathVariable Long post_id, @AuthenticationPrincipal UserDetailsImpl userDetails){
       return postService.deletePost(post_id, userDetails.getMember());
    }
 
-   //게시글 검색
+
+   // 게시글 검색
    @GetMapping("/category/search")
    public ApiResponseDto<List<PostResponseDto>> searchPost(@RequestParam(value = "category") String category,
                                                            @RequestParam(value = "keyword") String keyword,
@@ -102,6 +105,4 @@ public class PostController {
                                                            @AuthenticationPrincipal UserDetailsImpl userDetails){
       return postService.searchPost(category,keyword, sort, lat, lng,userDetails.getMember());
    }
-
-   //내가본 게시글 리스트
 }

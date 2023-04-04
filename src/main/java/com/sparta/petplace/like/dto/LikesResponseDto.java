@@ -16,10 +16,11 @@ public class LikesResponseDto {
         this.msg = msg;
         this.status = status;
     }
-    public static LikesResponseDto of(boolean likes, String msg, int status){
+    public static LikesResponseDto of(boolean likes, String msg,HttpStatus status){
         return LikesResponseDto.builder()
                 .likes(likes)
                 .msg(msg)
+                .status(status)
                 .build();
     }
 }
