@@ -44,9 +44,11 @@ public class KakaoService {
     private final JwtUtil jwtUtil;
 
 
-    public ApiResponseDto<LoginResponseDto> kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
+    public ApiResponseDto<SocialUserInfoDto> kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
+
         // 1. "인가 코드"로 "액세스 토큰" 요청
         String accessToken = getToken(code);
+
 
         // 2. 토큰으로 카카오 API 호출 : "액세스 토큰"으로 "카카오 사용자 정보" 가져오기
         SocialUserInfoDto userInfo = getKakaoUserInfo(accessToken);
@@ -67,8 +69,8 @@ public class KakaoService {
             refreshTokenRepository.save(newToken);
         }
 
-        jwtUtil.setHeader(response, tokenDto);
-        return ResponseUtils.ok(LoginResponseDto.of(member.getNickname(), member.getLoginType()));
+
+        return ResponseUtils.ok(SocialUserInfoDto.of(member.getNickname(), member.getEmail(), member.getLoginType()));
     }
 
 
@@ -86,20 +88,37 @@ public class KakaoService {
         body.add("redirect_uri", "https://fe-fawn.vercel.app/kakao/callback");
         body.add("code", code);
 
+
+
         // HTTP 요청 보내기
         HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest = new HttpEntity<>(body, headers);
         RestTemplate rt = new RestTemplate();
-        ResponseEntity<String> response = rt.exchange(
-                "https://kauth.kakao.com/oauth/token",
-                HttpMethod.POST,
-                kakaoTokenRequest,
-                String.class
-        );
+        ResponseEntity<String> response = null;
+        try {
+            response = rt.exchange(
+                    "https://kauth.kakao.com/oauth/token",
+                    HttpMethod.POST,
+                    kakaoTokenRequest,
+                    String.class
+            );
+        } catch (HttpClientErrorException e) {
+            log.error("Kakao API authentication failed with status code " + e.getRawStatusCode());
+            log.error("Response headers: " + e.getResponseHeaders());
+            log.error("Response body: " + e.getResponseBodyAsString());
+            throw e;
+        }
+//        ResponseEntity<String> response = rt.exchange(
+//                "https://kauth.kakao.com/oauth/token",
+//                HttpMethod.POST,
+//                kakaoTokenRequest,
+//                String.class
+//        );
 
         // HTTP 응답 (JSON) -> 액세스 토큰 파싱
         String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(responseBody);
+
         return jsonNode.get("access_token").asText();
     }
 
@@ -107,6 +126,7 @@ public class KakaoService {
     // 2. 토큰으로 카카오 API 호출 : "액세스 토큰"으로 "카카오 사용자 정보" 가져오기
     private SocialUserInfoDto getKakaoUserInfo(String accessToken) throws JsonProcessingException {
         // HTTP Header 생성
+        log.info("access토큰  : " + accessToken);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
@@ -114,14 +134,21 @@ public class KakaoService {
         // HTTP 요청 보내기
         HttpEntity<MultiValueMap<String, String>> kakaoUserInfoRequest = new HttpEntity<>(headers);
         RestTemplate rt = new RestTemplate();
-        ResponseEntity<String> response = rt.exchange(
-                "https://kapi.kakao.com/v2/user/me",
-                HttpMethod.POST,
-                kakaoUserInfoRequest,
-                String.class
-        );
+        String responseBody = "";
+        try {
+            ResponseEntity<String> response = rt.exchange(
+                    "https://kapi.kakao.com/v2/user/me",
+                    HttpMethod.POST,
+                    kakaoUserInfoRequest,
+                    String.class
+            );
+          responseBody = response.getBody();
+        } catch (HttpClientErrorException ex) {
+            log.error(ex.getMessage());
+            log.error("Kakao API authentication failed with status code " + ex.getRawStatusCode());
+            throw ex;
+        }
 
-        String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(responseBody);
 
@@ -132,7 +159,7 @@ public class KakaoService {
                 .get("email").asText();
 
         log.info("카카오 사용자 정보: " + id + ", " + nickname + ", " + email);
-        return new SocialUserInfoDto(id, nickname, email);
+        return new SocialUserInfoDto(nickname, email, LoginType.KAKAO_USER);
     }
 
 
