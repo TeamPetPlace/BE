@@ -24,7 +24,9 @@ public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implemen
         return queryFactory.selectFrom(post)
                 .where(eqCategory(category))
                 .where(containTitle(keyword)
-                    .or(containContents(keyword)))
+                    .or(containContents(keyword))
+                    .or(containFeature(keyword))
+                    .or(containAddress(keyword)))
                 .fetch();
     }
 
@@ -48,6 +50,20 @@ public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implemen
             return null;
         }
         return post.contents.containsIgnoreCase(keyword);
+    }
+
+    private BooleanExpression containFeature(String keyword) {
+        if(keyword == null || keyword.isEmpty()) {
+            return null;
+        }
+        return post.feature1.containsIgnoreCase(keyword);
+    }
+
+    private BooleanExpression containAddress(String keyword) {
+        if(keyword == null || keyword.isEmpty()) {
+            return null;
+        }
+        return post.address.containsIgnoreCase(keyword);
     }
 
 }
