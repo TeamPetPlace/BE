@@ -23,6 +23,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +39,10 @@ public class NotificationService {
 
     // SSE 연결 설정
     public SseEmitter subscribe(Long memberId, String lastEventId) {
+
+        // heartbeat 사용하기 위해
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
         // emitter 에 고유값을 주기위해
         String emitterId = makeTimeIncludeUd(memberId);
 
@@ -58,6 +65,21 @@ public class NotificationService {
             sendLostData(lastEventId, memberId, emitterId, emitter);
         }
 
+        // 주기적으로 빈 이벤트를 보내는 태스크 생성
+        Runnable heartbeatTask = () -> {
+            try {
+                String heartbeatMessage = "event: heartbeat\ndata: \n\n";
+                emitter.send(heartbeatMessage);
+            } catch (IOException e) {
+                emitter.complete();
+                executor.shutdown();
+            }
+        };
+
+        // 주기적으로 heartbeat 보내기
+        executor.scheduleAtFixedRate(heartbeatTask, 0, 10, TimeUnit.SECONDS);
+
+
         return emitter;
     }
 
@@ -75,7 +97,6 @@ public class NotificationService {
                     sendNotification(emitter, eventId, key, NotificationDto.create(notification));
                 }
         );
-
     }
 
     // 모든 알림 조회
