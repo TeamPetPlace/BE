@@ -41,8 +41,11 @@ public enum Error {
     // 409 CONFLICT 중복된 리소스
     DUPLICATED_EMAIL("409", "이미 존재하는 이메일입니다."),
     DUPLICATED_NICKNAME("409", "이미 존재하는 닉네임입니다."),
-    DUPLICATED_BUSINESS("409","중복된 사업자 입니다.");
+    DUPLICATED_BUSINESS("409","중복된 사업자 입니다."),
+    DUPLICATED_CHATROOM("409","이미 존제하는 채팅방 입니다.");
 
     private final String status;
     private final String message;
+
+
 }

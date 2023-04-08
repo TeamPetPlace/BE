@@ -35,9 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.sparta.petplace.exception.Error.NOT_EXIST_USER;
-import static com.sparta.petplace.exception.Error.PASSWORD_WRONG;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -92,10 +89,10 @@ public class MemberService {
         Optional<Member> findMember = memberRepository.findByEmail(email);
 
         if (findMember.isEmpty()) {
-            throw new CustomException(NOT_EXIST_USER);
+            throw new CustomException(Error.NOT_EXIST_USER);
         }
         if (!passwordEncoder.matches(password, findMember.get().getPassword())) {
-            throw new CustomException(PASSWORD_WRONG);
+            throw new CustomException(Error.PASSWORD_WRONG);
         }
         // Token 생성
         TokenDto tokenDto = jwtUtil.createAllToken(email);

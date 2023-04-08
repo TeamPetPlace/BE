@@ -160,7 +160,7 @@ public class KakaoService {
                 .get("email").asText();
 
         log.info("카카오 사용자 정보: " + id + ", " + nickname + ", " + email);
-        return new SocialUserInfoDto(nickname, email, LoginType.KAKAO_USER);
+        return new SocialUserInfoDto(nickname, email, LoginType.USER);
     }
 
 
@@ -174,10 +174,10 @@ public class KakaoService {
                     .nickname(userInfo.getNickname())
                     .password(passwordEncoder.encode(UUID.randomUUID().toString()))
                     .email(userInfo.getEmail())
-                    .loginType(LoginType.KAKAO_USER)
+                    .loginType(LoginType.USER)
                     .build());
         }else {
-            findUser.updateLoginStatus(LoginType.KAKAO_USER);
+            findUser.updateLoginStatus(LoginType.USER);
         }
         return findUser;
     }
