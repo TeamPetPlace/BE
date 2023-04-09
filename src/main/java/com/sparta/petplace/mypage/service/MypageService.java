@@ -148,7 +148,7 @@ public class MypageService {
 
         List<ReviewResponseDto> responseDtoList = new ArrayList<>();
         if (review.isEmpty()) {
-            throw new CustomException(Error.NOT_FOUND_POST);
+            return null;
         }
         for (Review r : review) {
             responseDtoList.add(ReviewResponseDto.from(r));
