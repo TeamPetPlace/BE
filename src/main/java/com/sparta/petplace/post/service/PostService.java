@@ -2,10 +2,7 @@ package com.sparta.petplace.post.service;
 
 
 import com.sparta.petplace.S3Service;
-import com.sparta.petplace.common.ApiResponseDto;
-import com.sparta.petplace.common.ErrorResponse;
-import com.sparta.petplace.common.ResponseUtils;
-import com.sparta.petplace.common.SuccessResponse;
+import com.sparta.petplace.common.*;
 import com.sparta.petplace.exception.CustomException;
 import com.sparta.petplace.exception.Error;
 import com.sparta.petplace.like.entity.Likes;
@@ -64,26 +61,22 @@ public class PostService {
     private final S3Uploader s3Uploader;
 
 
+
     // 게시글 카테고리별 (전체)조회
+    @LogExecutionTime
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getPosts(String category, Sort sort, String lat, String lng, int page, int size, Member member) {
 
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
         Pageable pageable = PageRequest.of(page, size);
-        List<Post> posts = postRepository.findByCategory(category);
-        //  위도, 경도
+        List<Post> posts = postRepository.find(category);
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
 
-        // PostResponseDto 생성
-        buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng ,sort);
-
-        // 정렬 메서드
-        sort(sort, postResponseDtos);
-
-        // 페이지네이션
+        buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng, sort);
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), postResponseDtos.size());
+
         return new PageImpl<>(postResponseDtos.subList(start, end), pageable, postResponseDtos.size());
     }
 
@@ -143,8 +136,9 @@ public class PostService {
         String d = "";
         // s3 이미지 업로드 try - catch
         try {
-            String d = s3Uploader.upload(resizeImage(requestDto.getImage().get(0)), requestDto.getImage().get(0).getOriginalFilename());
+            d = s3Uploader.upload(resizeImage(requestDto.getImage().get(0)), requestDto.getImage().get(0).getOriginalFilename());
             posts.setResizeImage(d);
+            log.info("createPost 메서드 / try 진입 = "+d);
         } catch (IOException e) {
             throw new CustomException(Error.FAIL_S3_SAVE);
         }
@@ -176,7 +170,7 @@ public class PostService {
             images.add(postImage.getImage());
         }
 
-        Integer reviewStar = 0;
+        int reviewStar = 0;
         int count = 0;
         // 리뷰 평점 계산
         for (Review r : posts.getReviews()) {
@@ -185,7 +179,7 @@ public class PostService {
         }
         int starAvr = 0;
         if (count != 0) {
-            starAvr = Math.round(reviewStar / count);
+            starAvr =  (int)((reviewStar/(float)count)+0.5);
         }
         Likes likes = likesRepository.findByPostIdAndMemberId(post_id, member.getId());
 
@@ -233,6 +227,7 @@ public class PostService {
                 s3Service.deleteFile(postImage.getImage());
                 postImageRepository.delete(postImage);
             }
+            s3Service.deleteFile(post.getResizeImage());
             List<PostImage> postImages = new ArrayList<>();
             List<String> img_url = s3Service.upload(requestDto.getImage());
             //  이미지 Repository 를 통해 DB에 저장
@@ -337,29 +332,22 @@ public class PostService {
     }
 
 
-    // PostResponseDto 셍성
+//     PostResponseDto 생성  개선형
     private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
+        log.info("buildResponseDtos() 메서드 시작");
         for (Post p : posts) {
             Double postLat = Double.parseDouble(p.getLat());
             Double postLng = Double.parseDouble(p.getLng());
             double distance = distance(usrtLat, usrtLng, postLat, postLng);
             p.getReviews().sort(Comparator.comparing(Review::getCreatedAt).reversed());
-            log.info("정렬 완료");
-            List<ReviewResponseDto> reviewResponseDtos = new ArrayList<>();
-            Integer reviewStar = 0;
-            int count = 0;
-            for (Review r : p.getReviews()) {
-                reviewResponseDtos.add(ReviewResponseDto.from(r));
-                reviewStar += r.getStar();
-                count += 1;
-                log.info(p.getCategory(),"for문 성공");
-            }
+            int reviewStar = p.getReviews().stream()
+                    .mapToInt(Review::getStar)
+                    .sum();
+            int count = p.getReviews().size();
             int starAvr = 0;
             if (count != 0) {
-                starAvr = Math.round(reviewStar / count);
-                log.info("if문 count 가 0이 아닐때");
+                starAvr =  (int)((reviewStar/(float)count)+0.5);
             }
-
             Likes likes = likesRepository.findByPostIdAndMemberId(p.getId(), member.getId());
             boolean isLike = likes != null;
             postResponseDtos.add(PostResponseDto.builder()
@@ -371,9 +359,9 @@ public class PostService {
                     .build());
         }
         sort(sort , postResponseDtos);
-        log.info("sort 성공");
-
+        log.info("buildResponseDtos() 메서드 종료");
     }
+
 
 
     // 이미지 리사이징
@@ -408,7 +396,7 @@ public class PostService {
                 InputStream inputStream = new ByteArrayInputStream(bos.toByteArray());
 
                 Files.copy(inputStream, outputfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                return outputfile;
+//                return outputfile;
             }
         } catch (Exception ex) {
             throw new RuntimeException(ex);
