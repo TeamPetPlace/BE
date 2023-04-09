@@ -51,15 +51,15 @@ public class ReviewService {
         // 3. 1주일이 경과했을 경우에만 새로운 리뷰를 작성할 수 있게 합니다.
         if (requestDto.getImage() == null || requestDto.getImage().isEmpty()) {
             Review review = reviewRepository.save(new Review(requestDto, null, post, member));
-            String content = post.getMember().getNickname()+"님!" + post.getTitle() + " 게시글 리뷰 알림이 도착했어요!";
+            String content =  post.getTitle() + " 게시글 리뷰 알림이 도착했어요!";
 
-            notificationService.send(post.getMember(), content, "testUrl");
+            notificationService.send(post.getMember(), content, String.valueOf(post_id), post.getCategory());
             return ResponseUtils.ok(ReviewResponseDto.from(review));
         }
 
         // 4. 댓글 생성시 작성자에게 알림 전송
-        String content = post.getMember().getNickname()+"님!" + post.getTitle() + " 게시글 리뷰 알림이 도착했어요!";
-        notificationService.send(post.getMember(), content, "testUrl");
+        String content =  post.getTitle() + " 게시글 리뷰 알림이 도착했어요!";
+        notificationService.send(post.getMember(), content, String.valueOf(post_id), post.getCategory());
 
 
 
