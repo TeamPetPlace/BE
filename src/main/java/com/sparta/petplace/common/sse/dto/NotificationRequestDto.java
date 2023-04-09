@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class NotificationRequestDto {
     private Member receiver;
     private String content;
-    private String url;
+    private String postId;
 }

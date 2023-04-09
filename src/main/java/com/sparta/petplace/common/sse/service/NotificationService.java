@@ -140,7 +140,8 @@ public class NotificationService {
         return Notification.builder()
                 .receiver(receiver)
                 .content(content)
-                .url(url)
+                .postId(postId)
+                .category(category)
                 .isRead(false)
                 .build();
     }
