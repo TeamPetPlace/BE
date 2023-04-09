@@ -71,6 +71,7 @@ public class Post extends Timestamped {
 
     @Builder
     public Post(PostRequestDto requestDto, Member member , Integer star, String resizeImage ) {
+        this.id = getId();
         this.email = member.getEmail();
         this.title = requestDto.getTitle();
         this.category = requestDto.getCategory();

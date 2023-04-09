@@ -20,6 +20,7 @@ public class HistoryPostResponseDto {
         this.category = post.getCategory();
         this.reSizeImage = post.getResizeImage();
         this.title = post.getTitle();
+        this.category = post.getCategory();
     }
 
     public static HistoryPostResponseDto of(Post post){

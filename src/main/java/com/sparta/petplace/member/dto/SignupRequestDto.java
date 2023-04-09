@@ -1,5 +1,6 @@
 package com.sparta.petplace.member.dto;
 
+import com.sparta.petplace.member.entity.Member;
 import lombok.Getter;
 
 import javax.validation.constraints.Pattern;
@@ -15,4 +16,10 @@ public class SignupRequestDto {
     // email 알파벳 숫자,하이폰,언덥바를 @를 기준으로 이전에 포함할 수 있고 @이후 도메인구조로 작성해야 한다. ex) naver.com
     @Pattern(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$", message = "이메일에러")
     private String email;
+
+    public SignupRequestDto(Member member) {
+        this.nickname = member.getNickname();
+        this.password = member.getPassword();
+        this.email = member.getEmail();
+    }
 }

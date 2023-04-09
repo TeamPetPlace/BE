@@ -1,5 +1,6 @@
 package com.sparta.petplace.member.dto;
 
+import com.sparta.petplace.member.entity.Member;
 import lombok.Getter;
 
 import javax.validation.constraints.Pattern;
@@ -14,4 +15,11 @@ public class BusinessSignupRequestDto {
     private String email;
     @Pattern(regexp = "^[0-9]{3}-[0-9]{2}-[0-9]{5}$", message = "사업자 등록번호 에러")
     private String business;
+
+    public BusinessSignupRequestDto(Member member) {
+        this.nickname = member.getNickname();
+        this.password = member.getPassword();
+        this.email = member.getEmail();
+        this.business = member.getBusiness();
+    }
 }
