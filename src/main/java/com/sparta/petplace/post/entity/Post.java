@@ -7,14 +7,12 @@ import com.sparta.petplace.review.entity.Review;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Setter
 @Getter
 @NoArgsConstructor
 public class Post extends Timestamped {
@@ -27,7 +25,7 @@ public class Post extends Timestamped {
     private String title;
     @Column(nullable = false)
     private String category;
-    @Column
+    @Column(length = 3000)
     private String contents;
     @OneToMany(mappedBy = "post")
     private List<PostImage> image = new ArrayList<>();
@@ -65,6 +63,7 @@ public class Post extends Timestamped {
     private Integer star;
     @OneToMany(mappedBy = "post")
     private List<Review> reviews =new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID",nullable = false)
     private Member member;
@@ -121,6 +120,10 @@ public class Post extends Timestamped {
                 requestDto(requestDto).
                 member(member).
                 build();
+    }
+
+    public void setResizeImage(String resizeImage) {
+        this.resizeImage = resizeImage;
     }
 
     public static Post of (PostRequestDto requestDto, Member member, Integer star){
