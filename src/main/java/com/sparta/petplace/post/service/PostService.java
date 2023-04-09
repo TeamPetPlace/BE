@@ -82,6 +82,7 @@ public class PostService {
 
 
     // 메인 페이지 조회
+    @LogExecutionTime
     @Transactional(readOnly = true)
     public List<PostResponseDto> getMain(String category, String lat, String lng, Member member) {
 
@@ -160,6 +161,7 @@ public class PostService {
 
 
     // 게시글 상세 조회
+    @LogExecutionTime
     @Transactional
     public ApiResponseDto<PostResponseDto> getPostId(Long post_id, Member member) {
         Post posts = postRepository.findById(post_id).orElseThrow(
@@ -278,6 +280,7 @@ public class PostService {
 
 
     // 게시글 검색 조회
+    @LogExecutionTime
     @Transactional(readOnly = true)
     public ApiResponseDto<List<PostResponseDto>> searchPost(String category, String keyword, Sort sort, String lat, String lng, Member member) {
 
@@ -334,7 +337,6 @@ public class PostService {
 
 //     PostResponseDto 생성  개선형
     private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
-        log.info("buildResponseDtos() 메서드 시작");
         for (Post p : posts) {
             Double postLat = Double.parseDouble(p.getLat());
             Double postLng = Double.parseDouble(p.getLng());
@@ -359,7 +361,6 @@ public class PostService {
                     .build());
         }
         sort(sort , postResponseDtos);
-        log.info("buildResponseDtos() 메서드 종료");
     }
 
 
