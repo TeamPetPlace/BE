@@ -140,6 +140,7 @@ public class PostService {
             postImageRepository.save(img);
             imgList.add(image);
         }
+        String d = "";
         // s3 이미지 업로드 try - catch
         try {
             String d = s3Uploader.upload(resizeImage(requestDto.getImage().get(0)), requestDto.getImage().get(0).getOriginalFilename());
@@ -147,6 +148,7 @@ public class PostService {
         } catch (IOException e) {
             throw new CustomException(Error.FAIL_S3_SAVE);
         }
+
         postRepository.save(posts);
         return ResponseUtils.ok(PostResponseDto.from(posts, imgList));
     }
@@ -239,8 +241,18 @@ public class PostService {
                 postImageRepository.save(img);
                 postImages.add(img);
             }
-            post.update(requestDto, postImages, post.getStar());
-            return ResponseUtils.ok(PostResponseDto.from(post, img_url) );
+
+            String d = null;
+            // s3 이미지 업로드 try - catch
+            try {
+                d = s3Uploader.upload(resizeImage(requestDto.getImage().get(0)), requestDto.getImage().get(0).getOriginalFilename());
+                post.update(requestDto, postImages, post.getStar());
+                post.setResizeImage(d);
+            } catch (IOException e) {
+                throw new CustomException(Error.FAIL_S3_SAVE);
+            }
+
+            return ResponseUtils.ok(PostResponseDto.from(post, img_url));
         } else {
             return ResponseUtils.ok(ErrorResponse.of(HttpStatus.BAD_REQUEST.toString(), "작성자만 게시물을 수정할 수 있습니다."));
         }
