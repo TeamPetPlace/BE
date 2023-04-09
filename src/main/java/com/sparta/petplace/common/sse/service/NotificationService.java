@@ -85,8 +85,8 @@ public class NotificationService {
 
     // 게시글에 리뷰 작성시 알림 보내는 기능
     @Async
-    public void send(Member receiver, String content, String url){
-        Notification notification = notificationRepository.save(createNotification(receiver, content, url));
+    public void send(Member receiver, String content, String postId, String category){
+        Notification notification = notificationRepository.save(createNotification(receiver, content, postId, category));
 
         Long receiverId = receiver.getId();
         String eventId = makeTimeIncludeUd(receiverId);
@@ -136,11 +136,12 @@ public class NotificationService {
     // ==================================== Method Extract ====================================
 
     // 알림 객체 생성
-    private Notification createNotification(Member receiver, String content, String url) {
+    private Notification createNotification(Member receiver, String content, String postId, String category) {
         return Notification.builder()
                 .receiver(receiver)
                 .content(content)
-                .url(url)
+                .postId(postId)
+                .category(category)
                 .isRead(false)
                 .build();
     }

@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface PostRepositoryCustom {
     List<Post> search(String category, String keyword);
+    List<Post> find(String category);
 }

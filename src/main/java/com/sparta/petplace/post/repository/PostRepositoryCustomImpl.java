@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import java.util.List;
 
 import static com.sparta.petplace.post.entity.QPost.post;
+import static com.sparta.petplace.review.entity.QReview.review1;
 
 public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implements PostRepositoryCustom{
 
@@ -24,9 +25,18 @@ public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implemen
         return queryFactory.selectFrom(post)
                 .where(eqCategory(category))
                 .where(containTitle(keyword)
-                    .or(containContents(keyword))
-                    .or(containFeature(keyword))
-                    .or(containAddress(keyword)))
+                        .or(containContents(keyword))
+                        .or(containFeature(keyword))
+                        .or(containAddress(keyword)))
+                .fetch();
+    }
+
+    @Override
+    public List<Post> find(String category){
+        return queryFactory.selectFrom(post)
+                .leftJoin(post.reviews, review1).fetchJoin()
+                .where(post.category.eq(category))
+                .distinct()
                 .fetch();
     }
 

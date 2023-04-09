@@ -22,14 +22,20 @@ public class Notification extends Timestamped {
 
 
     @Embedded
-    private RelatedURL url;
+    private PostId postId;
 
     @Column
     private Boolean isRead;
 
+    @Embedded
+    private RelatedURL url;
+
     // 알림내용 - 100자 이내
     @Embedded
     private NotificationContent content;
+
+    @Embedded
+    private Category category;
 
 
     // 회원정보
@@ -39,10 +45,12 @@ public class Notification extends Timestamped {
     private Member receiver;
 
     @Builder
-    public Notification(Member receiver, String content, String url, Boolean isRead) {
+    public Notification(Member receiver, String content,  String postId, Boolean isRead, String category) {
         this.receiver = receiver;
         this.content = new NotificationContent(content);
-        this.url = new RelatedURL(url);
+        this.postId = new PostId(postId);
+        this.category = new Category(category);
+        this.url = new RelatedURL("testUrl");
         this.isRead = isRead;
     }
 
@@ -52,6 +60,10 @@ public class Notification extends Timestamped {
 
     public String getContent() {
         return content.getContent();
+    }
+
+    public String getPostId() {
+        return postId.getPostId();
     }
 
     public String getUrl() {

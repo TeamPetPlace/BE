@@ -1,6 +1,7 @@
 package com.sparta.petplace.post.ResponseDto;
 
 import com.sparta.petplace.post.entity.Post;
+import com.sparta.petplace.review.dto.ReviewResponseDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,10 +42,12 @@ public class PostResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
+    private List<ReviewResponseDto> reviewResponseDtos;
+
     private boolean isLike;
 
     @Builder
-    public PostResponseDto(Post post, List<String> image, boolean isLike, int reviewCount , Integer star , Double distance){
+    public PostResponseDto(Post post, List<String> image, boolean isLike, int reviewCount , Integer star , Double distance, List<ReviewResponseDto> reviewResponseDtos){
         this.id = post.getId();
         this.reSizeImage = post.getResizeImage();
         this.modifiedAt = post.getModifiedAt();
@@ -65,6 +68,7 @@ public class PostResponseDto {
         this.ceo = post.getCeo();
         this.lat = post.getLat();
         this.lng = post.getLng();
+        this.reviewResponseDtos =reviewResponseDtos;
         this.reviewCount = reviewCount;
         this.distance= distance;
         this.isLike = isLike;
