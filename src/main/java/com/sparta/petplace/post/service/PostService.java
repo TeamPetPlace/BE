@@ -74,11 +74,9 @@ public class PostService {
         Double usrtLng = Double.parseDouble(lng);
 
         buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng, sort);
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), postResponseDtos.size());
         long totalCount = postRepository.countByCategory(category);
 
-        return new PageImpl<>(postResponseDtos.subList(start, end), pageable, totalCount);
+        return new PageImpl<>(postResponseDtos, pageable, totalCount);
     }
 
     // 메인 페이지 조회
