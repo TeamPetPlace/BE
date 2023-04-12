@@ -21,7 +21,6 @@ import com.sparta.petplace.member.repository.MemberRepository;
 import com.sparta.petplace.post.ResponseDto.HistoryPostResponseDto;
 import com.sparta.petplace.post.entity.Post;
 import com.sparta.petplace.post.repository.PostRepository;
-import com.sparta.petplace.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,9 +42,9 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
+
     private final PasswordEncoder passwordEncoder;
     private final MemberHistoryRepository memberHistoryRepository;
-    private final PostService postService;
     private final PostRepository postRepository;
 
 
@@ -147,7 +146,7 @@ public class MemberService {
         if (!jwtUtil.refreshTokenValidation(refreshToken)) {
             throw new CustomException(Error.WRONG_TOKEN);
         }
-        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(jwtUtil.getUserId(refreshToken), "Access"));
+        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(jwtUtil.getUserId(refreshToken)));
         return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "토큰 갱신 성공."));
     }
 

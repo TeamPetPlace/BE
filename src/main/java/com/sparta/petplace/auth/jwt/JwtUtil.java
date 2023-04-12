@@ -31,7 +31,7 @@ public class JwtUtil {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String REFRESH_TOKEN = "RefreshToken";
     public static final String AUTHORIZATION_KEY = "auth";
-    private static final String BEARER_PREFIX = "Bearer ";
+    public static final String BEARER_PREFIX = "Bearer ";
     private static final long TOKEN_TIME = 60 * 60 * 1000L;
     private static final long REFRESH_TIME = 72 * 60 * 60 * 1000L;
 
@@ -68,17 +68,26 @@ public class JwtUtil {
      *  serialized 객체를 통일해서 보내야함 2진수로 바꿈 (low level)
      *  signature - 내가 발행한 유효한 토큰인지 확인 단방향 암호
      */
-    public TokenDto createAllToken(String userId) {
-        return new TokenDto(createToken(userId, "Access"), createToken(userId, "Refresh"));
+    public TokenDto createAllToken(String email) {
+        return new TokenDto(createToken(email), createRefreshToken());
     }
-    public String createToken(String username,String type) {
+    public String createToken(String email) {
         Date date = new Date();
-        long time = type.equals("Access") ? TOKEN_TIME : REFRESH_TIME;
 
         return BEARER_PREFIX +
                 Jwts.builder()
-                        .setSubject(username) // 토큰안에 정보넣어준것 없어도됨 누구나 decode 가능 base 64
-                        .setExpiration(new Date(date.getTime() + time)) // serialized 객체를 통일해서 보내야함 2진수로 바꿈 (low level)
+                        .setSubject(email) // 토큰안에 정보넣어준것 없어도됨 누구나 decode 가능 base 64
+                        .setExpiration(new Date(date.getTime() + TOKEN_TIME)) // serialized 객체를 통일해서 보내야함 2진수로 바꿈 (low level)
+                        .setIssuedAt(date)
+                        .signWith(key, signatureAlgorithm) // signature - 내가 발행한 유효한 토큰인지 확인 단방향 암호
+                        .compact();
+    }
+    public String createRefreshToken() {
+        Date date = new Date();
+
+        return BEARER_PREFIX +
+                Jwts.builder()// 토큰안에 정보넣어준것 없어도됨 누구나 decode 가능 base 64
+                        .setExpiration(new Date(date.getTime() + REFRESH_TIME)) // serialized 객체를 통일해서 보내야함 2진수로 바꿈 (low level)
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm) // signature - 내가 발행한 유효한 토큰인지 확인 단방향 암호
                         .compact();

@@ -69,17 +69,15 @@ public class PostService {
 
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
         Pageable pageable = PageRequest.of(page, size);
-        List<Post> posts = postRepository.find(category);
+        List<Post> posts = postRepository.find(category, pageable);
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
 
         buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng, sort);
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), postResponseDtos.size());
+        long totalCount = postRepository.countByCategory(category);
 
-        return new PageImpl<>(postResponseDtos.subList(start, end), pageable, postResponseDtos.size());
+        return new PageImpl<>(postResponseDtos, pageable, totalCount);
     }
-
 
     // 메인 페이지 조회
     @LogExecutionTime
@@ -134,7 +132,7 @@ public class PostService {
             postImageRepository.save(img);
             imgList.add(image);
         }
-        String d = "";
+        String d;
         // s3 이미지 업로드 try - catch
         try {
             d = s3Uploader.upload(resizeImage(requestDto.getImage().get(0)), requestDto.getImage().get(0).getOriginalFilename());
@@ -239,7 +237,7 @@ public class PostService {
                 postImages.add(img);
             }
 
-            String d = null;
+            String d;
             // s3 이미지 업로드 try - catch
             try {
                 d = s3Uploader.upload(resizeImage(requestDto.getImage().get(0)), requestDto.getImage().get(0).getOriginalFilename());
@@ -335,14 +333,14 @@ public class PostService {
     }
 
 
-//     PostResponseDto 생성  개선형
+     // PostResponseDto 생성  개선형
     private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
         for (Post p : posts) {
             Double postLat = Double.parseDouble(p.getLat());
             Double postLng = Double.parseDouble(p.getLng());
             double distance = distance(usrtLat, usrtLng, postLat, postLng);
-            p.getReviews().sort(Comparator.comparing(Review::getCreatedAt).reversed());
-            int reviewStar = p.getReviews().stream()
+            List<Review> reviews = p.getReviews();
+            int reviewStar = reviews.stream()
                     .mapToInt(Review::getStar)
                     .sum();
             int count = p.getReviews().size();
