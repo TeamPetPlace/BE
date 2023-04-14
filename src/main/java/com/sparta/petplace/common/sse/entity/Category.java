@@ -12,19 +12,19 @@ import java.util.Objects;
 @Getter
 @Embeddable
 @NoArgsConstructor
-public class RelatedURL {
+public class Category {
 
     @Column(nullable = false, length = 255)
-    private String url;
+    private String category;
 
-    public RelatedURL(String url) {
-        if (ValidNoti(url)) {
+    public Category(String category) {
+        if (ValidNoti(category)) {
             throw new CustomException(Error.NOT_VALIDCONTENT);
         }
-        this.url = url;
+        this.category = category;
     }
 
-    private boolean ValidNoti(String url){
-        return Objects.isNull(url) || url.length() > 255 || url.isEmpty();
+    private boolean ValidNoti(String category){
+        return Objects.isNull(category) || category.length() > 255 || category.isEmpty();
     }
 }

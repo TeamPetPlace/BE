@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -76,8 +77,8 @@ public class PostController {
    // 게시글 작성
    @PostMapping("/write")
    public ApiResponseDto<PostResponseDto> createPost(@ModelAttribute() PostRequestDto requestDto,
-                                                     @AuthenticationPrincipal UserDetailsImpl userDetails){
-      return postService.createPost(requestDto,userDetails.getMember());
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+      return postService.createPost(requestDto, userDetails.getMember());
    }
 
 

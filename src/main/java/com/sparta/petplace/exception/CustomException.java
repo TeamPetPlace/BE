@@ -9,4 +9,8 @@ public class CustomException extends RuntimeException {
 
     private final Error error;
 
+    @Override
+    public String getMessage() {
+        return error.getMessage();
+    }
 }

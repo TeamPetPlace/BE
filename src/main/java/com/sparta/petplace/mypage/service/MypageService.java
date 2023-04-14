@@ -52,7 +52,8 @@ public class MypageService {
         Pageable pageable = PageRequest.of(page, size);
         List<Post> found = postRepository.findAllByEmail(member.getEmail());
         if (found.isEmpty()) {
-            throw new CustomException(Error.NOT_FOUND_POST);
+            return null;
+//            throw new CustomException(Error.NOT_FOUND_POST);
         }
         List<PostResponseDto> responseDtos = new ArrayList<>();
         for (Post post : found) {
@@ -148,7 +149,7 @@ public class MypageService {
 
         List<ReviewResponseDto> responseDtoList = new ArrayList<>();
         if (review.isEmpty()) {
-            throw new CustomException(Error.NOT_FOUND_POST);
+            return null;
         }
         for (Review r : review) {
             responseDtoList.add(ReviewResponseDto.from(r));

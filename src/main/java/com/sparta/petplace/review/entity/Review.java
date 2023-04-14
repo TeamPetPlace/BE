@@ -18,7 +18,7 @@ public class Review extends Timestamped {
     private Long id;
 
     @Column(nullable = false)
-    private Integer star;
+    private int star;
 
     @Column(nullable = false)
     private String review;

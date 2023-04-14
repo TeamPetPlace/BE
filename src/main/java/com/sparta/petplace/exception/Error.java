@@ -36,13 +36,20 @@ public enum Error {
     WRONG_IMAGE_FORMAT("400", "잘못된 포멧입니다."),
     WRONG_INPUT_CONTEN("400", "파일이 존재하지 않습니다."),
 
+    //SSE
     NOT_EXIST_NOTIFICATION("404","존재하지 않는 알림입니다."),
+
+    //CHAT
+   CHATROOM_NOT_FOUND("404", "채팅방이 존재하지 않습니다."),
 
     // 409 CONFLICT 중복된 리소스
     DUPLICATED_EMAIL("409", "이미 존재하는 이메일입니다."),
     DUPLICATED_NICKNAME("409", "이미 존재하는 닉네임입니다."),
-    DUPLICATED_BUSINESS("409","중복된 사업자 입니다.");
+    DUPLICATED_BUSINESS("409","중복된 사업자 입니다."),
+    DUPLICATED_CHATROOM("409","이미 존제하는 채팅방 입니다.");
 
     private final String status;
     private final String message;
+
+
 }
