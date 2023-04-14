@@ -13,4 +13,5 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     Optional<Member> findByBusiness(String business);
 
 
+    Optional<Member> findByNickname(String sender);
 }
