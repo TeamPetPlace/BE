@@ -55,7 +55,7 @@ public class KakaoService {
         Member member = registerKakaoUserIfNeeded(userInfo);
 
         // 4. JWT 토큰 반환
-        TokenDto tokenDto = jwtUtil.createAllToken(member.getEmail());
+        TokenDto tokenDto = jwtUtil.createAllToken(member.getEmail(), String.valueOf(member.getId()));
 
         //  Member Email값으로 refreshToken을 찾는다
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findAllByMemberId(member.getEmail());
