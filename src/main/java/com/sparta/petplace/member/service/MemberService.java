@@ -90,22 +90,22 @@ public class MemberService {
         String password = requestDto.getPassword();
 
         Optional<Member> findMember = memberRepository.findByEmail(email);
-
         if (findMember.isEmpty()) {
             throw new CustomException(NOT_EXIST_USER);
         }
+        String id = String.valueOf(findMember.get().getId());
         if (!passwordEncoder.matches(password, findMember.get().getPassword())) {
             throw new CustomException(PASSWORD_WRONG);
         }
         // Token 생성
-        TokenDto tokenDto = jwtUtil.createAllToken(email);
-        Optional<RefreshToken> refreshToken = refreshTokenRepository.findAllByMemberId(email);
+        TokenDto tokenDto = jwtUtil.createAllToken(email, id);
+        Optional<RefreshToken> refreshToken = refreshTokenRepository.findAllByMemberId(id);
         // Token 이 있을 경우 기존 Token 을 update
         if (refreshToken.isPresent()) {
             refreshTokenRepository.save(refreshToken.get().updateToken(tokenDto.getRefresh_Token()));
-        // Token 이 없을 경우 새로운 Token 을 생성
+            // Token 이 없을 경우 새로운 Token 을 생성
         } else {
-            RefreshToken newToken = new RefreshToken(tokenDto.getRefresh_Token(), email);
+            RefreshToken newToken = new RefreshToken(tokenDto.getRefresh_Token(), id);
             refreshTokenRepository.save(newToken);
         }
 
@@ -150,7 +150,13 @@ public class MemberService {
         if (!jwtUtil.refreshTokenValidation(refreshToken)) {
             throw new CustomException(Error.WRONG_TOKEN);
         }
-        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(jwtUtil.getUserId(refreshToken)));
+        Optional<Member> member = memberRepository.findById(Long.valueOf(jwtUtil.getUserId(refreshToken)));
+        String email = null;
+        if (member.isPresent()) {
+            email = member.get().getEmail();
+        }
+
+        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(email));
         return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "토큰 갱신 성공."));
     }
 
