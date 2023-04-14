@@ -38,6 +38,9 @@ jobs:
     - run: touch ./src/main/resources/application.yml
     - run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
     - run: cat ./src/main/resources/application.yml
+# (2.5) Gradle Wrappe 권한 설정
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
     
 # (3) Gradle build (Test 제외)
     - name: Build with Gradle
@@ -71,6 +74,3 @@ jobs:
         --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
         --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
         
-# (7) Gradle Wrappe 권한 설정
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
