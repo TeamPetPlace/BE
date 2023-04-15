@@ -52,6 +52,8 @@ public class WebSecurityConfig {
             cors.setAllowedOriginPatterns(List.of("*"));
             //  API 메서드 허용 범위
             cors.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+            //  test
+            cors.setAllowedOrigins(List.of("https://fe-fawn.vercel.app"));
             //  Headers 모든 값
             cors.setAllowedHeaders(List.of("*"));
             //  header token "Authorization"값 허용
