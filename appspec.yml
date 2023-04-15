@@ -9,7 +9,7 @@ files:
 permissions:
   - object: /
     pattern: "**"
-    owner: ubuntu
+    owner: root
     group: ubuntu
 
 hooks:
@@ -20,4 +20,5 @@ hooks:
   ApplicationStart:
     - location: scripts/start.sh
       timeout: 60
-      runas: ubuntu
+      runas: root
+
