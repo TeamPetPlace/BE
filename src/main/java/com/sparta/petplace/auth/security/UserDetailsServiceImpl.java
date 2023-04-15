@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +23,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Member findMember = memberRepository.findByEmail(email).orElseThrow(
-                () -> new CustomException(Error.NOT_EXIST_USER));
-        return new UserDetailsImpl(findMember, findMember.getEmail());
+        if (memberRepository.findByEmail(email).isPresent()){
+            Member findMember = memberRepository.findByEmail(email).orElseThrow(
+                    () -> new CustomException(Error.NOT_EXIST_USER));
+            return new UserDetailsImpl(findMember, findMember.getEmail());
+        }
+        Optional<Member> findMember = memberRepository.findById(Long.valueOf(email));
+        return new UserDetailsImpl(findMember.get(), findMember.get().getEmail());
     }
 }

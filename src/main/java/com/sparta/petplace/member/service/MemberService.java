@@ -34,6 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.sparta.petplace.exception.Error.NOT_EXIST_USER;
+import static com.sparta.petplace.exception.Error.PASSWORD_WRONG;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -42,7 +45,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
-
     private final PasswordEncoder passwordEncoder;
     private final MemberHistoryRepository memberHistoryRepository;
     private final PostRepository postRepository;
@@ -84,24 +86,25 @@ public class MemberService {
     public ApiResponseDto<LoginResponseDto> login(LoginRequestDto requestDto, HttpServletResponse response) {
         String email = requestDto.getEmail();
         String password = requestDto.getPassword();
+        log.info("로그인시 로그 확인");
 
         Optional<Member> findMember = memberRepository.findByEmail(email);
-
         if (findMember.isEmpty()) {
-            throw new CustomException(Error.NOT_EXIST_USER);
+            throw new CustomException(NOT_EXIST_USER);
         }
+        String id = String.valueOf(findMember.get().getId());
         if (!passwordEncoder.matches(password, findMember.get().getPassword())) {
-            throw new CustomException(Error.PASSWORD_WRONG);
+            throw new CustomException(PASSWORD_WRONG);
         }
         // Token 생성
-        TokenDto tokenDto = jwtUtil.createAllToken(email);
-        Optional<RefreshToken> refreshToken = refreshTokenRepository.findAllByMemberId(email);
+        TokenDto tokenDto = jwtUtil.createAllToken(email, id);
+        Optional<RefreshToken> refreshToken = refreshTokenRepository.findAllByMemberId(id);
         // Token 이 있을 경우 기존 Token 을 update
         if (refreshToken.isPresent()) {
             refreshTokenRepository.save(refreshToken.get().updateToken(tokenDto.getRefresh_Token()));
-        // Token 이 없을 경우 새로운 Token 을 생성
+            // Token 이 없을 경우 새로운 Token 을 생성
         } else {
-            RefreshToken newToken = new RefreshToken(tokenDto.getRefresh_Token(), email);
+            RefreshToken newToken = new RefreshToken(tokenDto.getRefresh_Token(), id);
             refreshTokenRepository.save(newToken);
         }
 
@@ -146,7 +149,13 @@ public class MemberService {
         if (!jwtUtil.refreshTokenValidation(refreshToken)) {
             throw new CustomException(Error.WRONG_TOKEN);
         }
-        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(jwtUtil.getUserId(refreshToken)));
+        Optional<Member> member = memberRepository.findById(Long.valueOf(jwtUtil.getUserId(refreshToken)));
+        String email = null;
+        if (member.isPresent()) {
+            email = member.get().getEmail();
+        }
+
+        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(email));
         return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "토큰 갱신 성공."));
     }
 

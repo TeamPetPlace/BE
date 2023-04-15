@@ -27,13 +27,13 @@ public class LogAspect {
         Object proceed = joinPoint.proceed();
         stopWatch.stop();
 
-        long totalTimeMillis = stopWatch.getTotalTimeMillis();
+        Double totalTimeMillis = stopWatch.getTotalTimeSeconds();
 
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         String className = joinPoint.getTarget().getClass().getSimpleName();
         String methodName = signature.getMethod().getName();
 
-        logger.info("실행 클래스 = {}  / 실행 메서드 = {} / 실행시간 = {}ms" ,className, methodName , totalTimeMillis);
+        logger.info("실행 클래스 = {}  / 실행 메서드 = {} / 실행시간 = {}sec" ,className, methodName , totalTimeMillis);
 
         return proceed  ;
 
