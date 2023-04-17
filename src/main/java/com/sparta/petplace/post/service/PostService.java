@@ -61,6 +61,7 @@ public class PostService {
     private final S3Uploader s3Uploader;
 
 
+
     // 게시글 카테고리별 (전체)조회
     @LogExecutionTime
     @Transactional(readOnly = true)
@@ -68,23 +69,14 @@ public class PostService {
 
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
         Pageable pageable = PageRequest.of(page, size);
-        List<Post> posts = postRepository.findByCategory(category);
-        //  위도, 경도
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
+        List<Post> posts = postRepository.find(category, pageable, usrtLat, usrtLng);
+        buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng, sort);
+        long totalCount = postRepository.countByCategory(category);
 
-        // PostResponseDto 생성
-        buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng ,sort);
-
-        // 정렬 메서드
-        sort(sort, postResponseDtos);
-
-        // 페이지네이션
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), postResponseDtos.size());
-        return new PageImpl<>(postResponseDtos.subList(start, end), pageable, postResponseDtos.size());
+        return new PageImpl<>(postResponseDtos, pageable, totalCount);
     }
-
 
     // 메인 페이지 조회
     @LogExecutionTime
@@ -92,21 +84,15 @@ public class PostService {
     public List<PostResponseDto> getMain(String category, String lat, String lng, Member member) {
 
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
-        List<Post> posts = postRepository.findByCategory(category);
+        Pageable pageable = PageRequest.of(0, 3);
+        List<Post> posts = postRepository.findByCategory(category, pageable);
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
 
         // PostResponseDto 생성
         buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng,Sort.DISTANCE);
 
-        List<PostResponseDto> mainResponseDto = new ArrayList<>();
-        int i = 0;
-        //  최대 3개까지 표시되는 while문
-        while (i < postResponseDtos.size() && i < 3) {
-            mainResponseDto.add(postResponseDtos.get(i));
-            i++;
-        }
-        return mainResponseDto;
+        return postResponseDtos.subList(0, Math.min(postResponseDtos.size(), 3));
     }
 
 
@@ -177,17 +163,16 @@ public class PostService {
             images.add(postImage.getImage());
         }
 
-        int reviewStar = 0;
-        int count = 0;
-        // 리뷰 평점 계산
-        for (Review r : posts.getReviews()) {
-            reviewStar += r.getStar();
-            count += 1;
-        }
+        List<Review> reviews = posts.getReviews();
+        int reviewStar = reviews.stream()
+                .mapToInt(Review::getStar)
+                .sum();
+        int count = posts.getReviews().size();
         int starAvr = 0;
         if (count != 0) {
             starAvr =  (int)((reviewStar/(float)count)+0.5);
         }
+
         Likes likes = likesRepository.findByPostIdAndMemberId(post_id, member.getId());
 
         PostResponseDto postResponseDto = PostResponseDto.of(posts, images, likes != null, count, starAvr);
@@ -287,19 +272,22 @@ public class PostService {
     // 게시글 검색 조회
     @LogExecutionTime
     @Transactional(readOnly = true)
-    public ApiResponseDto<List<PostResponseDto>> searchPost(String category, String keyword, Sort sort, String lat, String lng, Member member) {
-
+    public Page<PostResponseDto> searchPost(String category, String keyword, Sort sort, String lat, String lng, int page, int size, Member member) {
+        Pageable pageable = PageRequest.of(page, size);
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
         // QueryDSL 사용
-        List<Post> posts = postRepository.search(category, keyword);
+        List<Post> posts = postRepository.search(category, keyword, pageable);
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
 
         if (posts.isEmpty()) {
             throw new CustomException(Error.NOT_FOUND_POST);
         }
+
         buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng,sort);
-        return ResponseUtils.ok(postResponseDtos);
+        long totalCount = postRepository.countByCategoryAndKeyword(category, keyword);
+
+        return new PageImpl<>(postResponseDtos, pageable, totalCount);
     }
 
 
@@ -340,7 +328,7 @@ public class PostService {
     }
 
 
-    // PostResponseDto 생성  개선형
+     // PostResponseDto 생성  개선형
     private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
         for (Post p : posts) {
             Double postLat = Double.parseDouble(p.getLat());
@@ -367,6 +355,8 @@ public class PostService {
         }
         sort(sort , postResponseDtos);
     }
+
+
 
 
     // 이미지 리사이징
