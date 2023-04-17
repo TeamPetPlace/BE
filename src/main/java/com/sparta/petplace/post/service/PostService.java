@@ -63,22 +63,44 @@ public class PostService {
 
 
     // 게시글 카테고리별 (전체)조회
-    @LogExecutionTime
+//    @LogExecutionTime
+//    @Transactional(readOnly = true)
+//    public Page<PostResponseDto> getPosts(String category, Sort sort, String lat, String lng, int page, int size, Member member) {
+//
+//        List<PostResponseDto> postResponseDtos = new ArrayList<>();
+//        Pageable pageable = PageRequest.of(page, size);
+//        List<Post> posts = postRepository.find(category, pageable);
+//        Double usrtLat = Double.parseDouble(lat);
+//        Double usrtLng = Double.parseDouble(lng);
+//
+//        buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng, sort);
+//        sort(sort, postResponseDtos);
+//        long totalCount = postRepository.countByCategory(category);
+//
+//        return new PageImpl<>(postResponseDtos, pageable, totalCount);
+//    }
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getPosts(String category, Sort sort, String lat, String lng, int page, int size, Member member) {
 
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
         Pageable pageable = PageRequest.of(page, size);
-        List<Post> posts = postRepository.find(category, pageable);
+        List<Post> posts = postRepository.findByCategory(category);
+        //  위도, 경도
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
 
-        buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng, sort);
-        sort(sort, postResponseDtos);
-        long totalCount = postRepository.countByCategory(category);
+        // PostResponseDto 생성
+        buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng ,sort);
 
-        return new PageImpl<>(postResponseDtos, pageable, totalCount);
+        // 정렬 메서드
+        sort(sort, postResponseDtos);
+
+        // 페이지네이션
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), postResponseDtos.size());
+        return new PageImpl<>(postResponseDtos.subList(start, end), pageable, postResponseDtos.size());
     }
+
 
     // 메인 페이지 조회
     @LogExecutionTime
@@ -335,33 +357,67 @@ public class PostService {
 
 
      // PostResponseDto 생성  개선형
-    private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
-        for (Post p : posts) {
-            Double postLat = Double.parseDouble(p.getLat());
-            Double postLng = Double.parseDouble(p.getLng());
-            double distance = distance(usrtLat, usrtLng, postLat, postLng);
-            List<Review> reviews = p.getReviews();
-            int reviewStar = reviews.stream()
-                    .mapToInt(Review::getStar)
-                    .sum();
-            int count = p.getReviews().size();
-            int starAvr = 0;
-            if (count != 0) {
-                starAvr =  (int)((reviewStar/(float)count)+0.5);
-            }
-            Likes likes = likesRepository.findByPostIdAndMemberId(p.getId(), member.getId());
-            boolean isLike = likes != null;
-            postResponseDtos.add(PostResponseDto.builder()
-                    .post(p)
-                    .star(starAvr)
-                    .distance(distance)
-                    .reviewCount(count)
-                    .isLike(isLike)
-                    .build());
-        }
-        sort(sort , postResponseDtos);
-    }
+//    private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
+//        for (Post p : posts) {
+//            Double postLat = Double.parseDouble(p.getLat());
+//            Double postLng = Double.parseDouble(p.getLng());
+//            double distance = distance(usrtLat, usrtLng, postLat, postLng);
+//            List<Review> reviews = p.getReviews();
+//            int reviewStar = reviews.stream()
+//                    .mapToInt(Review::getStar)
+//                    .sum();
+//            int count = p.getReviews().size();
+//            int starAvr = 0;
+//            if (count != 0) {
+//                starAvr =  (int)((reviewStar/(float)count)+0.5);
+//            }
+//            Likes likes = likesRepository.findByPostIdAndMemberId(p.getId(), member.getId());
+//            boolean isLike = likes != null;
+//            postResponseDtos.add(PostResponseDto.builder()
+//                    .post(p)
+//                    .star(starAvr)
+//                    .distance(distance)
+//                    .reviewCount(count)
+//                    .isLike(isLike)
+//                    .build());
+//        }
+//        sort(sort , postResponseDtos);
+//    }
+     private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
+         for (Post p : posts) {
+             Double postLat = Double.parseDouble(p.getLat());
+             Double postLng = Double.parseDouble(p.getLng());
+             double distance = distance(usrtLat, usrtLng, postLat, postLng);
+             p.getReviews().sort(Comparator.comparing(Review::getCreatedAt).reversed());
+             log.info("정렬 완료");
+             List<ReviewResponseDto> reviewResponseDtos = new ArrayList<>();
+             Integer reviewStar = 0;
+             int count = 0;
+             for (Review r : p.getReviews()) {
+                 reviewResponseDtos.add(ReviewResponseDto.from(r));
+                 reviewStar += r.getStar();
+                 count += 1;
+                 log.info(p.getCategory(),"for문 성공");
+             }
+             int starAvr = 0;
+             if (count != 0) {
+                 starAvr = Math.round(reviewStar / count);
+                 log.info("if문 count 가 0이 아닐때");
+             }
+             Likes likes = likesRepository.findByPostIdAndMemberId(p.getId(), member.getId());
+             boolean isLike = likes != null;
+             postResponseDtos.add(PostResponseDto.builder()
+                     .post(p)
+                     .star(starAvr)
+                     .distance(distance)
+                     .reviewCount(count)
+                     .isLike(isLike)
+                     .build());
+         }
+         sort(sort , postResponseDtos);
+         log.info("sort 성공");
 
+     }
 
 
     // 이미지 리사이징
