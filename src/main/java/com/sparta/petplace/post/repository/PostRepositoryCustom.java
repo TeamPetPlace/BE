@@ -10,7 +10,8 @@ import java.util.List;
 @Repository
 @Transactional(readOnly = true)
 public interface PostRepositoryCustom {
-    List<Post> search(String category, String keyword, Pageable pageable);
+//    List<Post> search(String category, String keyword, Pageable pageable);
+List<Post> search(String category, String keyword);
     List<Post> find(String category, Pageable pageable, Double lat, Double lng);
     long countByCategory(String category);
     long countByCategoryAndKeyword(String category, String keyword);
