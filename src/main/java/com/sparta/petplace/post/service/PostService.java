@@ -62,7 +62,8 @@ public class PostService {
 
 
     // 게시글 카테고리별 (전체)조회
-actional(readOnly = true)
+    @LogExecutionTime
+    @Transactional(readOnly = true)
     public Page<PostResponseDto> getPosts(String category, Sort sort, String lat, String lng, int page, int size, Member member) {
 
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
