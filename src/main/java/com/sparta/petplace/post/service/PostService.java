@@ -61,7 +61,6 @@ public class PostService {
     private final S3Uploader s3Uploader;
 
 
-
     // 게시글 카테고리별 (전체)조회
     @LogExecutionTime
     @Transactional(readOnly = true)
@@ -69,16 +68,23 @@ public class PostService {
 
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
         Pageable pageable = PageRequest.of(page, size);
-        List<Post> posts = postRepository.find(category, pageable);
+        List<Post> posts = postRepository.findByCategory(category);
+        //  위도, 경도
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
 
-        buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng, sort);
-        sort(sort, postResponseDtos);
-        long totalCount = postRepository.countByCategory(category);
+        // PostResponseDto 생성
+        buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng ,sort);
 
-        return new PageImpl<>(postResponseDtos, pageable, totalCount);
+        // 정렬 메서드
+        sort(sort, postResponseDtos);
+
+        // 페이지네이션
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), postResponseDtos.size());
+        return new PageImpl<>(postResponseDtos.subList(start, end), pageable, postResponseDtos.size());
     }
+
 
     // 메인 페이지 조회
     @LogExecutionTime
@@ -334,7 +340,7 @@ public class PostService {
     }
 
 
-     // PostResponseDto 생성  개선형
+    // PostResponseDto 생성  개선형
     private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
         for (Post p : posts) {
             Double postLat = Double.parseDouble(p.getLat());
@@ -361,7 +367,6 @@ public class PostService {
         }
         sort(sort , postResponseDtos);
     }
-
 
 
     // 이미지 리사이징
