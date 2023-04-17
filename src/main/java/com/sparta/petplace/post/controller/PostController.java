@@ -97,12 +97,14 @@ public class PostController {
 
    // 게시글 검색
    @GetMapping("/category/search")
-   public ApiResponseDto<List<PostResponseDto>> searchPost(@RequestParam(value = "category") String category,
+   public Page<PostResponseDto> searchPost(@RequestParam(value = "category") String category,
                                                            @RequestParam(value = "keyword") String keyword,
                                                            @RequestParam(value = "sort") Sort sort,
                                                            @RequestParam(value = "lat") String lat,
                                                            @RequestParam(value = "lng") String lng,
+                                                           @RequestParam(value = "page") int page,
+                                                           @RequestParam(value = "size") int size,
                                                            @AuthenticationPrincipal UserDetailsImpl userDetails){
-      return postService.searchPost(category,keyword, sort, lat, lng,userDetails.getMember());
+      return postService.searchPost(category,keyword, sort, lat, lng, page, size, userDetails.getMember());
    }
 }
