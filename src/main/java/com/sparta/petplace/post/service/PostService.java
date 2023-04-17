@@ -74,6 +74,7 @@ public class PostService {
         Double usrtLng = Double.parseDouble(lng);
 
         buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng, sort);
+        sort(sort, postResponseDtos);
         long totalCount = postRepository.countByCategory(category);
 
         return new PageImpl<>(postResponseDtos, pageable, totalCount);
