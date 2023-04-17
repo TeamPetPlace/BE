@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "post", indexes = {@Index(columnList = "category")})
+@Table(name = "post", indexes = {@Index(columnList = "category"), @Index(columnList = "lng"), @Index(columnList = "lat")})
 public class Post extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,6 +62,7 @@ public class Post extends Timestamped {
     private String feature1;
     @Column
     private Integer star;
+
     @OneToMany(mappedBy = "post")
     private List<Review> reviews =new ArrayList<>();
 
