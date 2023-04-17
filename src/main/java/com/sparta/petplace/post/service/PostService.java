@@ -46,6 +46,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -272,22 +273,19 @@ public class PostService {
     // 게시글 검색 조회
     @LogExecutionTime
     @Transactional(readOnly = true)
-    public Page<PostResponseDto> searchPost(String category, String keyword, Sort sort, String lat, String lng, int page, int size, Member member) {
-        Pageable pageable = PageRequest.of(page, size);
+    public ApiResponseDto<List<PostResponseDto>> searchPost(String category, String keyword, Sort sort, String lat, String lng, Member member) {
+
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
         // QueryDSL 사용
-        List<Post> posts = postRepository.search(category, keyword, pageable);
+        List<Post> posts = postRepository.search(category, keyword);
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
 
         if (posts.isEmpty()) {
             throw new CustomException(Error.NOT_FOUND_POST);
         }
-
         buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng,sort);
-        long totalCount = postRepository.countByCategoryAndKeyword(category, keyword);
-
-        return new PageImpl<>(postResponseDtos, pageable, totalCount);
+        return ResponseUtils.ok(postResponseDtos);
     }
 
 
@@ -328,9 +326,35 @@ public class PostService {
     }
 
 
-     // PostResponseDto 생성  개선형
+//     // PostResponseDto 생성  개선형
+//    private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
+//        for (Post p : posts) {
+//            Double postLat = Double.parseDouble(p.getLat());
+//            Double postLng = Double.parseDouble(p.getLng());
+//            double distance = distance(usrtLat, usrtLng, postLat, postLng);
+//            List<Review> reviews = p.getReviews();
+//            int reviewStar = reviews.stream()
+//                    .mapToInt(Review::getStar)
+//                    .sum();
+//            int count = p.getReviews().size();
+//            int starAvr = 0;
+//            if (count != 0) {
+//                starAvr =  (int)((reviewStar/(float)count)+0.5);
+//            }
+//            Likes likes = likesRepository.findByPostIdAndMemberId(p.getId(), member.getId());
+//            boolean isLike = likes != null;
+//            postResponseDtos.add(PostResponseDto.builder()
+//                    .post(p)
+//                    .star(starAvr)
+//                    .distance(distance)
+//                    .reviewCount(count)
+//                    .isLike(isLike)
+//                    .build());
+//        }
+//    }
+
     private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
-        for (Post p : posts) {
+        List<PostResponseDto> dtoList = posts.parallelStream().map(p -> {
             Double postLat = Double.parseDouble(p.getLat());
             Double postLng = Double.parseDouble(p.getLng());
             double distance = distance(usrtLat, usrtLng, postLat, postLng);
@@ -338,24 +362,24 @@ public class PostService {
             int reviewStar = reviews.stream()
                     .mapToInt(Review::getStar)
                     .sum();
-            int count = p.getReviews().size();
+            int count = reviews.size();
             int starAvr = 0;
             if (count != 0) {
                 starAvr =  (int)((reviewStar/(float)count)+0.5);
             }
             Likes likes = likesRepository.findByPostIdAndMemberId(p.getId(), member.getId());
             boolean isLike = likes != null;
-            postResponseDtos.add(PostResponseDto.builder()
+            return PostResponseDto.builder()
                     .post(p)
                     .star(starAvr)
                     .distance(distance)
                     .reviewCount(count)
                     .isLike(isLike)
-                    .build());
-        }
-        sort(sort , postResponseDtos);
+                    .build();
+        }).collect(Collectors.toList());
+        postResponseDtos.addAll(dtoList);
+        sort(sort, postResponseDtos);
     }
-
 
 
 
