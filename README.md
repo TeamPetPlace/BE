@@ -43,3 +43,57 @@ https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455
 
 ## ⁉️ Trouble Shooting
 
+### 1. 리눅스 권한
+    
+#### 문제상황
+    
+    - CodeDeploy를 통해서 CICD를 구축해서 AWS EC2에 Spring Server를 배포.
+    - FE서버와의 연결상태 확인.
+    - 게시글 작성에서 이미지를 리스트로 업로드하는 부분이 서버상에서 작동하지 않는다..
+    
+#### 에러코드
+    
+    - java.io.ioexception: permission denied
+    - ??? 갑자기 이게 무슨일인가 했다.
+    
+#### 시도 및 확인
+    
+    - Local환경에서 Test 결과 - 성공
+    - 서버 환경에서 Test결과 - 실패
+    - 어떤 변수값에 의한 문제발생인지 파악이 필요했다.
+    - 대부분의 기능들이 정상적으로 작동하나 이미지 업로드와 관련된 부분에서 동일한 에러가 발생함을 확인.
+        - 이미지 사이즈에 의한 문제인가? - 아니다 - 로컬상에도 사이즈를 줄여서 해봤지만 지정한 예외가 처리되게 되어있다.
+        - 이미지 용량에 의한 문제인가? - 아니다 - 로컬상에서 도합 10MB넘는 용량을 업로드하면 지정한 예외가 처리되었다.
+    - 코드나 기능상에서 예상할 수 있는 문제는 모두 아닌것으로 생각되었다.
+    - 환경이나 설정의 문제라고 생각.
+    - 권한이라는 단어에 집중했다 -> 어디의 권한인가? -> 서버상의 권한일것 -> 서버는 어디인가? -> 우분투 서버이며 이는 리눅스 기반의 서버이다.
+    - 시도1. 현재 ubuntu 에서 사용자 권환상태를 확인.
+    - 시도2. 권한 침범이 예상되는 경로에 chmod 755 -R /경로 를 사용해서 권한 업데이트 후 메서드 실행 - 실패
+    
+#### 해결
+    
+    - appspec.yml에서 petmissions 부분을 변경.
+    아래 
+version: 0.0
+os: linux
+
+files:
+  - source:  /
+    destination: /home/ubuntu/app
+    overwrite: yes
+
+permissions:
+  - object: /
+    pattern: "**"
+    owner: ubuntu -> root 로 변경
+    group: ubuntu
+
+hooks:
+  AfterInstall:
+    - location: scripts/stop.sh
+      timeout: 60
+      runas: ubuntu
+  ApplicationStart:
+    - location: scripts/start.sh
+      timeout: 60
+      runas: root
