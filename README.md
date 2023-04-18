@@ -43,26 +43,6 @@ https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455
 
 ## ⁉️ Trouble Shooting
 
-### 1. 리눅스 권한
+### 리눅스 권한, DB데이터 오류, GitHub, Nginx 언더스코어(_)가 포함된 헤더를 제거하는 현상등등
 
-https://www.notion.so/Trouble-shooting-8db7d8ab551c4b6a8fec18f4cd6fb412?pvs=4#4441609c2d7244c4a5051e4603497960
-   
-### 2. DB 데이터 오류
-
-https://www.notion.so/Trouble-shooting-8db7d8ab551c4b6a8fec18f4cd6fb412?pvs=4#8095de6d30094b758d5a4592341aaf55
-
-### 3. GitHub
-
-https://www.notion.so/Trouble-shooting-8db7d8ab551c4b6a8fec18f4cd6fb412?pvs=4#53eeb3893d5f4922b99c9a610b867b1e
-
-### 4. Nginx 언더스코어(_)가 포함된 헤더를 제거하는 현상
-
-https://www.notion.so/Trouble-shooting-8db7d8ab551c4b6a8fec18f4cd6fb412?pvs=4#eba33bb74e464483a87b03398dbc6b2e
-
-### 5. 서버 CORS
-
-https://www.notion.so/Trouble-shooting-8db7d8ab551c4b6a8fec18f4cd6fb412?pvs=4#bed2027ddabc4d79aa02e7039834e1b5
-
-### 6. 카카오로그인 구현 중 잘못된 접근 토큰 오류 발생
-
-https://www.notion.so/Trouble-shooting-8db7d8ab551c4b6a8fec18f4cd6fb412?pvs=4#7440e40ffae649038bc03b56be599134
+https://www.notion.so/Trouble-shooting-8db7d8ab551c4b6a8fec18f4cd6fb412?pvs=4#7ed7fe72238d49a483743778a7fe834f
