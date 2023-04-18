@@ -26,8 +26,9 @@
 
 ## 🏗️ API명세서
 
-![KakaoTalk_20230418_191503093](https://user-images.githubusercontent.com/107843779/232747158-5e65f4d0-b15f-4be6-8029-912077a23703.png)
+![화면 캡처 2023-04-18 191834](https://user-images.githubusercontent.com/107843779/232747808-52219ec5-a182-42af-a466-a9203bb2e32e.png)
 
+https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455ee6ce58da
 
 ## 🧱 ERD
 
