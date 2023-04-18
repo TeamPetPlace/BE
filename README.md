@@ -26,6 +26,7 @@
 
 ## 🏗️ API명세서
 
+![KakaoTalk_20230418_191503093](https://user-images.githubusercontent.com/107843779/232747158-5e65f4d0-b15f-4be6-8029-912077a23703.png)
 
 
 ## 🧱 ERD
