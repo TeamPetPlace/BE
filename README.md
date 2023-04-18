@@ -43,4 +43,4 @@ https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455
 
 ## ⁉️ Trouble Shooting
 
-https://www.notion.so/Trouble-shooting-8db7d8ab551c4b6a8fec18f4cd6fb412?pvs=4#7ed7fe72238d49a483743778a7fe834f
+https://www.notion.so/Back-TIL-94e8a51c3c3e4b739ef1ed79ed039c2e?pvs=4
