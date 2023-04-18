@@ -1,6 +1,6 @@
 # 프로젝트 소개
-<img width="240" alt="KakaoTalk_20230408_184239973" src="https://user-images.githubusercontent.com/107843779/232654475-7c25c85b-8b9f-4319-bf50-4a2182afb3d8.png">
-### PetPlace (실전프로젝트)
+<img width="240" alt="KakaoTalk_20230408_184239973" src="https://user-images.githubusercontent.com/107843779/232654475-7c25c85b-8b9f-4319-bf50-4a2182afb3d8.png">### PetPlace (실전프로젝트)
+
 
 
 
