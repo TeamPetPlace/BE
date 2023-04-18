@@ -31,5 +31,9 @@
 
 ## 🔗 와이어 프레임
 
+<img width="1116" alt="1" src="https://user-images.githubusercontent.com/107843779/232656078-f32b5829-1db7-4fc8-a9bc-528801995fda.png">
+<img width="1088" alt="2" src="https://user-images.githubusercontent.com/107843779/232656083-3951d433-8741-43cd-90ab-268866118d71.png">
+
 
 ## ⁉️ Trouble Shooting
+
