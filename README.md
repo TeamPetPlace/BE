@@ -25,21 +25,21 @@
 ### 5. 채팅문의와 후기 등록시 알림 기능
 
 ## 🏗️ API명세서
+<div align="center">
+<img width=70% src=https://user-images.githubusercontent.com/107843779/232747808-52219ec5-a182-42af-a466-a9203bb2e32e.png >
 
-![화면 캡처 2023-04-18 191834](https://user-images.githubusercontent.com/107843779/232747808-52219ec5-a182-42af-a466-a9203bb2e32e.png)
-
-https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455ee6ce58da
+https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455ee6ce58da</div>
 
 ## 🧱 ERD
-
-<img width="970" alt="스크린샷 2023-04-18 오전 2 43 48" src="https://user-images.githubusercontent.com/107843779/232655250-e93b3cb3-68dd-45bc-bee0-49279482f5e7.png">
+<div align="center">
+<img width="70%" alt="스크린샷 2023-04-18 오전 2 43 48" src="https://user-images.githubusercontent.com/107843779/232655250-e93b3cb3-68dd-45bc-bee0-49279482f5e7.png"></div>
 
 
 ## 🔗 와이어 프레임
-
-<img width="1116" alt="1" src="https://user-images.githubusercontent.com/107843779/232656078-f32b5829-1db7-4fc8-a9bc-528801995fda.png">
-<img width="1088" alt="2" src="https://user-images.githubusercontent.com/107843779/232656083-3951d433-8741-43cd-90ab-268866118d71.png">
-
+<div align="center">
+<img width="70%" alt="1" src="https://user-images.githubusercontent.com/107843779/232656078-f32b5829-1db7-4fc8-a9bc-528801995fda.png">
+<img width="70%" alt="2" src="https://user-images.githubusercontent.com/107843779/232656083-3951d433-8741-43cd-90ab-268866118d71.png">
+</div>
 
 ## ⁉️ Trouble Shooting
 
