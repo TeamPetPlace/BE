@@ -2,6 +2,9 @@
 #### 프로젝트명 : Pet Place (P.P)
 #### 사업자는 반려동물에 관한 업체(병원, 미용, 카페)를 등록하고, 유저가 검색, 필터링 할 수 있는 웹페이지 (위치기반정보제공 서비스)
 
+## :two_men_holding_hands: 아키텍쳐
+![1](https://user-images.githubusercontent.com/107843779/233069317-4c3051d3-626a-4da0-b93e-740d4ea8dbb4.png)
+
 ## 📚 기술스택
 
 <div align="center">
@@ -13,9 +16,6 @@
   <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=MySQL&logoColor=white" />
   <img src="https://img.shields.io/badge/Amazon EC2-FF9900?style=flat&logo=Amazon EC2&logoColor=white" />
 </div>
-
-## 📚 아키텍쳐
-![1](https://user-images.githubusercontent.com/107843779/233069317-4c3051d3-626a-4da0-b93e-740d4ea8dbb4.png)
 
 ## 💡 구현기능
 
