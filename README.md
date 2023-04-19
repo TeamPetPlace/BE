@@ -50,7 +50,7 @@ https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455
 
 ## ⁉️ Trouble Shooting
 
-1. - 리눅스 권한
+## 1. - 리눅스 권한
     
     ### 문제상황
     
@@ -104,7 +104,7 @@ https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455
 	      timeout: 60
 	      runas: root
 	      
-2. - 카카오로그인 구현 중 잘못된 접근 토큰 오류 발생
+## 2. - 카카오로그인 구현 중 잘못된 접근 토큰 오류 발생
     
     ### 문제
     
@@ -121,7 +121,7 @@ https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455
     
     카카오 내애플리케이션에서 허용IP를 확인해보니 저번에 이것저것 만저보다가 실수로 추가했던 허용IP들 때문에 안됐습니다. 그래서 삭제 후 시도하니 작동
 
-3. - 서버 터짐 현상?
+## 3. - 서버 터짐 현상?
     
     ### 문제
     
@@ -137,7 +137,7 @@ https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455
     
     WebConfig 클래스에 securityFilterChain안에 cors.setAllowedOrigins(List.of(”https://fe-fawn.vercel.app”));을 추가하니 CORS문제가 해결됐습니다.
     
-4. - Nginx 언더스코어(_)가 포함된 헤더를 제거하는 현상
+## 4. - Nginx 언더스코어(_)가 포함된 헤더를 제거하는 현상
     
     ### 문제상황
     
@@ -164,7 +164,7 @@ https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455
     - conf/nginx.conf에 다음 설정을 추가하면 허용할 수 있다.
     - underscores_in_headers on;
 
-5. - GitHub
+## 5. - GitHub
     
     문제 : Commit → Push → margin → 풀을 받은 후 확인 했지만 인텔리제이에 안들어옴
     
@@ -172,7 +172,7 @@ https://www.notion.so/266ffd7e3c204b8792fb1c69e2d451f4?v=57c8874ec74d46e8b455455
     
     해결 : 인텔리제이에서 main폴더에 오른쪽마우스버튼 클릭후 ‘디스크에서 다시로드’을 클릭하니까 margin한 자료가 나왔습니다.
     
-6. - **DB 데이터 오류**
+## 6. - **DB 데이터 오류**
     
     ### 발생상황
     
