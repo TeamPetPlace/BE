@@ -1,27 +1,28 @@
 package com.sparta.petplace.post.repository;
 
-import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.petplace.post.entity.Post;
 import com.sparta.petplace.post.entity.Sort;
 import com.sparta.petplace.review.entity.QReview;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.sparta.petplace.post.entity.QPost.post;
 
 @Repository
 @Transactional(readOnly = true)
+@Slf4j
 public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implements PostRepositoryCustom{
 
 
@@ -59,43 +60,31 @@ public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implemen
 
     @Override
     public List<Post> find(String category, Pageable pageable, Double lat, Double lng, Sort sort) {
-        OrderSpecifier<?> orderSpecifier;
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
+        QReview review = QReview.review1;
 
         switch (sort) {
             case DISTANCE:
-                orderSpecifier = Expressions.asNumber(
-                        Expressions.template(Double.class, distanceQuery(lat, lng))
-                ).asc();
+                orderSpecifiers.add(Expressions.asNumber(Expressions.template(Double.class, distanceQuery(lat, lng))).asc());
                 break;
-            case STAR: {
-                QReview review = QReview.review1;
-                NumberPath<Integer> starSum = Expressions.numberPath(Integer.class, "starSum");
-                orderSpecifier = new OrderSpecifier<>(Order.DESC, starSum);
-                return queryFactory
-                        .select(post, review.star.sum().as(starSum))
-                        .from(post)
-                        .leftJoin(post.reviews, review)
-                        .where(post.category.eq(category))
-                        .groupBy(post)
-                        .orderBy(orderSpecifier)
-                        .offset(pageable.getOffset())
-                        .limit(pageable.getPageSize())
-                        .fetch()
-                        .stream()
-                        .map(tuple -> tuple.get(post))
-                        .collect(Collectors.toList());
-            }
+            case STAR:
+                NumberExpression<Double> avgStar = review.star.avg().coalesce(0.0);
+                orderSpecifiers.add(avgStar.desc());
+                break;
             case REVIEW:
-                orderSpecifier = post.reviews.size().desc();
+                orderSpecifiers.add(post.reviews.size().desc());
                 break;
             default:
                 throw new IllegalArgumentException("Invalid sort value: " + sort);
         }
+
         return queryFactory
                 .select(post)
                 .from(post)
+                .leftJoin(post.reviews, review)
                 .where(post.category.eq(category))
-                .orderBy(orderSpecifier)
+                .groupBy(post)
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
