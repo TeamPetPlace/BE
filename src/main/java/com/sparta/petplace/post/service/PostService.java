@@ -46,7 +46,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -72,7 +71,9 @@ public class PostService {
         Pageable pageable = PageRequest.of(page, size);
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
-        List<Post> posts = postRepository.find(category, pageable, usrtLat, usrtLng);
+        List<Post> posts = postRepository.find(category, pageable, usrtLat, usrtLng, sort);
+
+
         buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng, sort);
         long totalCount = postRepository.countByCategory(category);
 
@@ -354,31 +355,37 @@ public class PostService {
 //    }
 
     private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
-        List<PostResponseDto> dtoList = posts.parallelStream().map(p -> {
-            Double postLat = Double.parseDouble(p.getLat());
-            Double postLng = Double.parseDouble(p.getLng());
-            double distance = distance(usrtLat, usrtLng, postLat, postLng);
-            List<Review> reviews = p.getReviews();
-            int reviewStar = reviews.stream()
-                    .mapToInt(Review::getStar)
-                    .sum();
-            int count = reviews.size();
-            int starAvr = 0;
-            if (count != 0) {
-                starAvr =  (int)((reviewStar/(float)count)+0.5);
-            }
-            Likes likes = likesRepository.findByPostIdAndMemberId(p.getId(), member.getId());
-            boolean isLike = likes != null;
-            return PostResponseDto.builder()
-                    .post(p)
-                    .star(starAvr)
-                    .distance(distance)
-                    .reviewCount(count)
-                    .isLike(isLike)
-                    .build();
-        }).collect(Collectors.toList());
+        List<PostResponseDto> dtoList = posts.stream()
+                .map(p -> {
+                    Double postLat = Double.parseDouble(p.getLat());
+                    Double postLng = Double.parseDouble(p.getLng());
+                    double distance = Math.sqrt(Math.pow(usrtLat - postLat, 2) + Math.pow(usrtLng - postLng, 2));
+                    int starAvr = 0;
+                    List<Review> reviews = p.getReviews();
+                    int[] countAndStarSum = {0, 0};
+                    synchronized(reviews) { // 동기화 처리
+                        reviews.forEach(r -> {
+                            countAndStarSum[0]++; // count 증가
+                            countAndStarSum[1] += r.getStar(); // star 합계
+                        });
+                    }
+                    int count = countAndStarSum[0];
+                    int reviewStar = countAndStarSum[1];
+                    if (count != 0) {
+                        starAvr =  (int)((reviewStar/(float)count)+0.5);
+                    }
+                    Likes likes = likesRepository.findByPostIdAndMemberId(p.getId(), member.getId());
+                    boolean isLike = likes != null;
+                    return PostResponseDto.builder()
+                            .post(p)
+                            .star(starAvr)
+                            .distance(distance)
+                            .reviewCount(count)
+                            .isLike(isLike)
+                            .build();
+                })
+                .toList();
         postResponseDtos.addAll(dtoList);
-        sort(sort, postResponseDtos);
     }
 
 
