@@ -8,6 +8,18 @@
 
 ![1](https://user-images.githubusercontent.com/107843779/233069317-4c3051d3-626a-4da0-b93e-740d4ea8dbb4.png)
 
+
+## 👤 FE/BE 팀 정보
+
+| 이름     | FE/BE           | Github                           |
+| -------- | --------------- | -------------------------------- |
+| 남궁윤서 | FE , Sub-Leader | https://github.com/lionloopy     |
+| 신은진   | FE              | https://github.com/JESin10       |
+| 이건호   | BE, Leader      | https://github.com/Kuno1734      |
+| 김우영   | BE              | https://github.com/micheal1woo   |
+| 표창영   | BE              | https://github.com/PyoChangYeong |
+
+
 ## 📚 기술스택
 
 <div align="center">
@@ -23,16 +35,6 @@
 	<img src="https://img.shields.io/badge/?style=flat&logo=&logoColor=white" />
 	<img src="https://img.shields.io/badge/?style=flat&logo=&logoColor=white" />
 </div>
-
-## 👤 FE/BE 팀 정보
-
-| 이름     | FE/BE           | Github                           |
-| -------- | --------------- | -------------------------------- |
-| 남궁윤서 | FE , Sub-Leader | https://github.com/lionloopy     |
-| 신은진   | FE              | https://github.com/JESin10       |
-| 이건호   | BE, Leader      | https://github.com/Kuno1734      |
-| 김우영   | BE              | https://github.com/micheal1woo   |
-| 표창영   | BE              | https://github.com/PyoChangYeong |
 
 ## 💡 구현기능
 
