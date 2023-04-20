@@ -69,10 +69,10 @@ public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implemen
                 break;
             case STAR: {
                 QReview review = QReview.review1;
-                NumberPath<Long> starSum = Expressions.numberPath(Long.class, "starSum");
+                NumberPath<Integer> starSum = Expressions.numberPath(Integer.class, "starSum");
                 orderSpecifier = new OrderSpecifier<>(Order.DESC, starSum);
                 return queryFactory
-                        .select(post, review.star.sum().as(String.valueOf(starSum)))
+                        .select(post, review.star.sum().as(starSum))
                         .from(post)
                         .leftJoin(post.reviews, review)
                         .where(post.category.eq(category))
