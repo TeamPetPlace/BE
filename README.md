@@ -22,11 +22,6 @@
 | 표창영   | BE              | https://github.com/PyoChangYeong |
 
 
-## 📝 아키텍쳐
-
-![1](https://user-images.githubusercontent.com/107843779/233069317-4c3051d3-626a-4da0-b93e-740d4ea8dbb4.png)
-
-
 ## 📚 기술스택
 
 <div align="center">
@@ -42,6 +37,11 @@
 	<img src="https://img.shields.io/badge/?style=flat&logo=&logoColor=white" />
 	<img src="https://img.shields.io/badge/?style=flat&logo=&logoColor=white" />
 </div>
+
+## 📝 아키텍쳐
+
+![1](https://user-images.githubusercontent.com/107843779/233069317-4c3051d3-626a-4da0-b93e-740d4ea8dbb4.png)
+
 
 ## 💡 구현기능
 
