@@ -4,10 +4,6 @@
 
 ##### 노션 링크 : https://bow-starfish-ba2.notion.site/Team3-Pet-Place-7d132d0dc6764eee90799fe342dec49f
 
-## 📝 아키텍쳐
-
-![1](https://user-images.githubusercontent.com/107843779/233069317-4c3051d3-626a-4da0-b93e-740d4ea8dbb4.png)
-
 
 ## 👤 FE/BE 팀 정보
 
@@ -18,6 +14,11 @@
 | 이건호   | BE, Leader      | https://github.com/Kuno1734      |
 | 김우영   | BE              | https://github.com/micheal1woo   |
 | 표창영   | BE              | https://github.com/PyoChangYeong |
+
+
+## 📝 아키텍쳐
+
+![1](https://user-images.githubusercontent.com/107843779/233069317-4c3051d3-626a-4da0-b93e-740d4ea8dbb4.png)
 
 
 ## 📚 기술스택
