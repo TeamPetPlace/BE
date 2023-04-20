@@ -30,13 +30,15 @@ public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implemen
 
 
     @Override
-    public List<Post> search(String category, String keyword){
+    public List<Post> search(String category, String keyword,  Pageable pageable){
         return queryFactory.selectFrom(post)
                 .where(eqCategory(category))
                 .where(containTitle(keyword)
                         .or(containContents(keyword))
                         .or(containFeature(keyword))
                         .or(containAddress(keyword)))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
     }
 
