@@ -274,19 +274,22 @@ public class PostService {
     // 게시글 검색 조회
     @LogExecutionTime
     @Transactional(readOnly = true)
-    public ApiResponseDto<List<PostResponseDto>> searchPost(String category, String keyword, Sort sort, String lat, String lng, Member member) {
-
+    public Page<PostResponseDto> searchPost(String category, String keyword, Sort sort, String lat, String lng, int page, int size, Member member) {
+        Pageable pageable = PageRequest.of(page, size);
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
         // QueryDSL 사용
-        List<Post> posts = postRepository.search(category, keyword);
+        List<Post> posts = postRepository.search(category, keyword, pageable);
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
 
         if (posts.isEmpty()) {
             throw new CustomException(Error.NOT_FOUND_POST);
         }
+
         buildResponseDtos(member, postResponseDtos, posts, usrtLat, usrtLng,sort);
-        return ResponseUtils.ok(postResponseDtos);
+        long totalCount = postRepository.countByCategoryAndKeyword(category, keyword);
+
+        return new PageImpl<>(postResponseDtos, pageable, totalCount);
     }
 
 
