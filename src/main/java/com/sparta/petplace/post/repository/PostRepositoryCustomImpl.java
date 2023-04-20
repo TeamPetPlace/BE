@@ -1,9 +1,11 @@
 package com.sparta.petplace.post.repository;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.petplace.post.entity.Post;
+import com.sparta.petplace.post.entity.Sort;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
@@ -52,20 +54,26 @@ public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implemen
 //    }
 
     @Override
-    public List<Post> find(String category, Pageable pageable, Double lat, Double lng) {
+    public List<Post> find(String category, Pageable pageable, Double lat, Double lng, Sort sort) {
+        OrderSpecifier<?> orderSpecifier = switch (sort) {
+            case DISTANCE -> Expressions.asNumber(
+                    Expressions.template(Double.class, distanceQuery(lat, lng))
+            ).asc();
+            case STAR -> post.star.avg().desc();
+            case REVIEW -> post.reviews.size().desc();
+            default -> throw new IllegalArgumentException("Invalid sort value: " + sort);
+        };
         return queryFactory
                 .select(post)
                 .from(post)
                 .where(post.category.eq(category))
-                .orderBy(
-                        Expressions.asNumber(
-                                Expressions.template(Double.class, distanceQuery(lat, lng))
-                        ).asc()
-                )
+                .orderBy(orderSpecifier)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
     }
+
+
     private String distanceQuery(Double lat1, Double lng1, Double lat2, Double lng2) {
         return "6371 * acos(cos(radians(" + lat1 + ")) * cos(radians(" + lat2 + ")) * cos(radians(" + lng2 + ") - radians(" + lng1 + ")) + sin(radians(" + lat1 + ")) * sin(radians(" + lat2 + ")))";
     }
