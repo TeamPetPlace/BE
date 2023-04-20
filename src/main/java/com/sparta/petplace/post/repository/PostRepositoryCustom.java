@@ -13,6 +13,7 @@ import java.util.List;
 public interface PostRepositoryCustom {
     List<Post> search(String category, String keyword, Pageable pageable);
     List<Post> find(String category, Pageable pageable, Double lat, Double lng,  Sort sort);
+
     long countByCategory(String category);
     long countByCategoryAndKeyword(String category, String keyword);
 }
