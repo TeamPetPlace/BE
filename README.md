@@ -33,7 +33,11 @@
   <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=MySQL&logoColor=white" />
   <img src="https://img.shields.io/badge/Amazon EC2-FF9900?style=flat&logo=Amazon EC2&logoColor=white" />
   <img src="https://img.shields.io/badge/Linux-FCC624?style=flat&logo=linux&logoColor=white" />
-  <img src="https://img.shields.io/badge/GitHub Actions-#2088FF?style=flat&logo=githubactions&logoColor=white" />
+
+
+## 📚 공용스택
+	
+  <img src="https://img.shields.io/badge/GitHub-#181717?style=flat&logo=github&logoColor=white" />
 	<img src="https://img.shields.io/badge/?style=flat&logo=&logoColor=white" />
 	<img src="https://img.shields.io/badge/?style=flat&logo=&logoColor=white" />
 </div>
