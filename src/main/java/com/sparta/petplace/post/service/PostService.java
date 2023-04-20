@@ -315,12 +315,26 @@ public class PostService {
 
     // ==================================== Method Extract ====================================
 
+    //거리구하기
+    private double distance(double lat1, double lon1, double lat2, double lon2) {
+        double R = 6371; // 지구 반지름
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c;
+        return distance * 1000.0;
+    }
+
+
     private void buildResponseDtos(Member member, List<PostResponseDto> postResponseDtos, List<Post> posts, Double usrtLat, Double usrtLng, Sort sort) {
         List<PostResponseDto> dtoList = posts.stream()
                 .map(p -> {
                     Double postLat = Double.parseDouble(p.getLat());
                     Double postLng = Double.parseDouble(p.getLng());
-                    double distance = Math.sqrt(Math.pow(usrtLat - postLat, 2) + Math.pow(usrtLng - postLng, 2));
+                    double distance = distance(usrtLat, usrtLng, postLat, postLng);
                     int starAvr = 0;
                     List<Review> reviews = p.getReviews();
                     int[] countAndStarSum = {0, 0};

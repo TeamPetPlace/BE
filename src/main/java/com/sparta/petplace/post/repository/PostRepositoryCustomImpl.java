@@ -59,7 +59,7 @@ public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implemen
             case DISTANCE -> Expressions.asNumber(
                     Expressions.template(Double.class, distanceQuery(lat, lng))
             ).asc();
-            case STAR -> post.star.avg().desc();
+            case STAR -> post.star.sum().intValue().desc();
             case REVIEW -> post.reviews.size().desc();
             default -> throw new IllegalArgumentException("Invalid sort value: " + sort);
         };
