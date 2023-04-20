@@ -1,11 +1,14 @@
 package com.sparta.petplace.post.repository;
 
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.petplace.post.entity.Post;
 import com.sparta.petplace.post.entity.Sort;
+import com.sparta.petplace.review.entity.QReview;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
@@ -13,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.sparta.petplace.post.entity.QPost.post;
 
@@ -55,14 +59,38 @@ public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implemen
 
     @Override
     public List<Post> find(String category, Pageable pageable, Double lat, Double lng, Sort sort) {
-        OrderSpecifier<?> orderSpecifier = switch (sort) {
-            case DISTANCE -> Expressions.asNumber(
-                    Expressions.template(Double.class, distanceQuery(lat, lng))
-            ).asc();
-            case STAR -> post.star.sum().intValue().desc();
-            case REVIEW -> post.reviews.size().desc();
-            default -> throw new IllegalArgumentException("Invalid sort value: " + sort);
-        };
+        OrderSpecifier<?> orderSpecifier;
+
+        switch (sort) {
+            case DISTANCE:
+                orderSpecifier = Expressions.asNumber(
+                        Expressions.template(Double.class, distanceQuery(lat, lng))
+                ).asc();
+                break;
+            case STAR: {
+                QReview review = QReview.review1;
+                NumberPath<Long> starSum = Expressions.numberPath(Long.class, "starSum");
+                orderSpecifier = new OrderSpecifier<>(Order.DESC, starSum);
+                return queryFactory
+                        .select(post, review.star.sum().as(String.valueOf(starSum)))
+                        .from(post)
+                        .leftJoin(post.reviews, review)
+                        .where(post.category.eq(category))
+                        .groupBy(post)
+                        .orderBy(orderSpecifier)
+                        .offset(pageable.getOffset())
+                        .limit(pageable.getPageSize())
+                        .fetch()
+                        .stream()
+                        .map(tuple -> tuple.get(post))
+                        .collect(Collectors.toList());
+            }
+            case REVIEW:
+                orderSpecifier = post.reviews.size().desc();
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid sort value: " + sort);
+        }
         return queryFactory
                 .select(post)
                 .from(post)
