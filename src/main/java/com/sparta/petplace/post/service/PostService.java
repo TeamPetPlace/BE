@@ -278,9 +278,9 @@ public class PostService {
         Pageable pageable = PageRequest.of(page, size);
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
         // QueryDSL 사용
-        List<Post> posts = postRepository.search(category, keyword, pageable);
         Double usrtLat = Double.parseDouble(lat);
         Double usrtLng = Double.parseDouble(lng);
+        List<Post> posts = postRepository.search(category, keyword, usrtLat, usrtLng, pageable, sort);
 
         if (posts.isEmpty()) {
             throw new CustomException(Error.NOT_FOUND_POST);
@@ -291,6 +291,7 @@ public class PostService {
 
         return new PageImpl<>(postResponseDtos, pageable, totalCount);
     }
+
 
 
     //리뷰 페이지네이션

@@ -35,28 +35,39 @@ public class PostRepositoryCustomImpl extends QuerydslRepositorySupport implemen
 
 
     @Override
-    public List<Post> search(String category, String keyword,  Pageable pageable){
+    public List<Post> search(String category, String keyword, Double lat, Double lng, Pageable pageable, Sort sort) {
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
+        QReview review = QReview.review1;
+
+        switch (sort) {
+            case DISTANCE:
+                orderSpecifiers.add(Expressions.asNumber(Expressions.template(Double.class, distanceQuery(lat, lng))).asc());
+                break;
+            case STAR:
+                NumberExpression<Double> avgStar = review.star.avg().coalesce(0.0);
+                orderSpecifiers.add(avgStar.desc());
+                break;
+            case REVIEW:
+                orderSpecifiers.add(post.reviews.size().desc());
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid sort value: " + sort);
+        }
+
         return queryFactory.selectFrom(post)
+                .leftJoin(post.reviews, review)
                 .where(eqCategory(category))
                 .where(containTitle(keyword)
                         .or(containContents(keyword))
                         .or(containFeature(keyword))
                         .or(containAddress(keyword)))
+                .groupBy(post)
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
     }
 
-//    @Override
-//    public List<Post> find(String category, Pageable pageable, Double lat, Double lng) {
-//        return queryFactory.selectFrom(post)
-//                .leftJoin(post.reviews, review1).fetchJoin()
-//                .where(post.category.eq(category))
-//                .distinct()
-//                .offset(pageable.getOffset())
-//                .limit(pageable.getPageSize())
-//                .fetch();
-//    }
 
     @Override
     public List<Post> find(String category, Pageable pageable, Double lat, Double lng, Sort sort) {
