@@ -24,6 +24,16 @@
 	<img src="https://img.shields.io/badge/?style=flat&logo=&logoColor=white" />
 </div>
 
+## 👤 FE/BE 팀 정보
+
+| 이름     | FE/BE           | Github                           |
+| -------- | --------------- | -------------------------------- |
+| 남궁윤서 | FE , Sub-Leader | https://github.com/lionloopy     |
+| 신은진   | FE              | https://github.com/JESin10       |
+| 이건호   | BE, Leader      | https://github.com/Kuno1734      |
+| 김우영   | BE              | https://github.com/micheal1woo   |
+| 표창영   | BE              | https://github.com/PyoChangYeong |
+
 ## 💡 구현기능
 
 ### 1. 유저의 위치기반 반려동물 동반 시설 정보 및 추천 (map)
